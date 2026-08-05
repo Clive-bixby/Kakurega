@@ -77,6 +77,16 @@ Examples:
 
 Avoid documenting patterns before they are actually used.
 
+Backend
+
+- FastAPI app creation lives in `backend/app/main.py` via `create_app()`.
+- Versioned routes are collected under `backend/app/api/v1` and mounted at the configured API prefix.
+
+Frontend
+
+- React routing is centralized in `frontend/src/App.tsx`.
+- The primary application shell lives in `frontend/src/layouts/AppLayout.tsx`.
+
 ---
 
 # Shared Building Blocks
@@ -87,9 +97,8 @@ Examples:
 
 Frontend
 
-Shared layouts
-
-Shared components
+- `AppLayout` provides the persistent app navigation.
+- `PageHeader` provides the basic page title header.
 
 Common hooks
 

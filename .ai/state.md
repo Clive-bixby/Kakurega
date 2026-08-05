@@ -42,11 +42,11 @@ Replace outdated information instead of appending duplicates.
 
 Frontend
 
-Not implemented.
+React + Vite + TypeScript scaffold implemented.
 
 Backend
 
-Not implemented.
+FastAPI scaffold implemented.
 
 Database
 
@@ -62,17 +62,23 @@ Not implemented.
 
 Frontend
 
-None
+- React frontend in `frontend`
+- Routing configured with pages for Dashboard, Library, Add Book, Search, Insights, and Settings
 
 Backend
 
-None
+- FastAPI application package in `backend/app`
+- Versioned API router under `backend/app/api/v1`
+- Core settings under `backend/app/core`
 
 ---
 
 # Reusable Components
 
-None
+Frontend
+
+- App layout with persistent navigation
+- Shared page header
 
 ---
 
@@ -84,7 +90,7 @@ None
 
 # API Surface
 
-None
+- `GET /api/v1/health`
 
 ---
 
@@ -122,9 +128,11 @@ docs/
 
 # Current Architecture
 
-No implementation exists yet.
+Backend scaffold follows the planned FastAPI architecture from SYSTEM_ARCHITECTURE.md.
 
-Refer to SYSTEM_ARCHITECTURE.md for the planned architecture.
+Business logic, database models, repositories, and services are not implemented yet.
+
+Refer to SYSTEM_ARCHITECTURE.md for the planned full architecture.
 
 ---
 
@@ -133,8 +141,8 @@ Refer to SYSTEM_ARCHITECTURE.md for the planned architecture.
 ## Foundation
 
 - [ ] Repository setup
-- [ ] Backend scaffold
-- [ ] Frontend scaffold
+- [x] Backend scaffold
+- [x] Frontend scaffold
 - [ ] Docker
 
 ## Backend

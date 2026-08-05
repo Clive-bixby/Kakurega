@@ -1,0 +1,1 @@
+"""Kakurega backend application package."""
