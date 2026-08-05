@@ -1,0 +1,364 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Lexicon - Home Dashboard</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface": "#111317",
+                      "on-surface": "#e2e2e8",
+                      "surface-container-high": "#282a2e",
+                      "surface-container": "#1e2024",
+                      "on-primary-fixed": "#07006c",
+                      "on-secondary-container": "#a7b6cc",
+                      "text-primary": "#F8FAFC",
+                      "primary-fixed": "#e1e0ff",
+                      "primary-fixed-dim": "#c0c1ff",
+                      "tertiary-fixed": "#ffdcc5",
+                      "inverse-surface": "#e2e2e8",
+                      "on-secondary-fixed-variant": "#39485a",
+                      "inverse-on-surface": "#2f3035",
+                      "primary-container": "#8083ff",
+                      "tertiary": "#ffb783",
+                      "surface-deep": "#16191F",
+                      "tertiary-container": "#d97721",
+                      "on-error": "#690005",
+                      "surface-container-lowest": "#0c0e12",
+                      "error": "#ffb4ab",
+                      "on-tertiary-fixed": "#301400",
+                      "surface-tint": "#c0c1ff",
+                      "text-secondary": "#94A3B8",
+                      "secondary-fixed": "#d4e4fa",
+                      "on-error-container": "#ffdad6",
+                      "on-surface-variant": "#c7c4d7",
+                      "error-container": "#93000a",
+                      "on-background": "#e2e2e8",
+                      "on-secondary": "#233143",
+                      "border-subtle": "#2D333D",
+                      "secondary": "#b9c8de",
+                      "primary": "#c0c1ff",
+                      "surface-variant": "#333539",
+                      "secondary-fixed-dim": "#b9c8de",
+                      "surface-muted": "#1E2229",
+                      "on-tertiary": "#4f2500",
+                      "on-secondary-fixed": "#0d1c2d",
+                      "surface-bright": "#37393e",
+                      "on-tertiary-container": "#452000",
+                      "outline": "#908fa0",
+                      "secondary-container": "#39485a",
+                      "background": "#111317",
+                      "outline-variant": "#464554",
+                      "on-primary-fixed-variant": "#2f2ebe",
+                      "on-primary": "#1000a9",
+                      "accent-purple-dim": "#312E81",
+                      "surface-dim": "#111317",
+                      "on-primary-container": "#0d0096",
+                      "tertiary-fixed-dim": "#ffb783",
+                      "surface-container-low": "#1a1c20",
+                      "on-tertiary-fixed-variant": "#703700",
+                      "surface-container-highest": "#333539",
+                      "inverse-primary": "#494bd6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "card-padding-lg": "32px",
+                      "sidebar-width": "260px",
+                      "page-padding-mobile": "24px",
+                      "unit": "8px",
+                      "page-padding-desktop": "40px",
+                      "card-padding-md": "24px",
+                      "content-max-width": "1200px"
+              },
+              "fontFamily": {
+                      "headline-h1": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "headline-h2": ["Inter"],
+                      "body-md": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "label-md": ["Inter"],
+                      "headline-h3": ["Inter"],
+                      "caption": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-h1": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "headline-h2": ["24px", {"lineHeight": "32px", "fontWeight": "500"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                      "headline-h3": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                      "caption": ["12px", {"lineHeight": "16px", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        /* Hide scrollbar for horizontal scroll areas but keep functionality */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-surface text-primary min-h-screen font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- SideNavBar (Shared Component) -->
+<nav class="fixed h-full left-0 z-40 bg-surface-deep py-6 w-sidebar-width flex flex-col border-r border-border-subtle/30">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">book</span>
+</div>
+<div>
+<h1 class="text-headline-h3 font-headline-h3 font-semibold text-on-surface">Lexicon</h1>
+<p class="text-caption font-caption text-text-secondary">Personal Library</p>
+</div>
+</div>
+<div class="flex-1 px-4 space-y-0.5">
+<!-- Active Tab: Dashboard -->
+<a class="bg-surface-container-high text-primary rounded-lg px-4 py-3 flex items-center gap-3 transition-all duration-200 border-l-2 border-primary rounded-l-none" href="#">
+<span class="material-symbols-outlined text-primary">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<!-- Inactive Tabs -->
+<a class="text-text-secondary hover:text-on-surface hover:bg-surface-container px-4 py-3 flex items-center gap-3 transition-colors rounded-lg opacity-70" href="#">
+<span class="material-symbols-outlined">local_library</span>
+<span class="font-label-md text-label-md">Library</span>
+</a>
+<a class="text-text-secondary hover:text-on-surface hover:bg-surface-container px-4 py-3 flex items-center gap-3 transition-colors rounded-lg opacity-70" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-md text-label-md">Reading Now</span>
+</a>
+<a class="text-text-secondary hover:text-on-surface hover:bg-surface-container px-4 py-3 flex items-center gap-3 transition-colors rounded-lg opacity-70" href="#">
+<span class="material-symbols-outlined">bookmark_add</span>
+<span class="font-label-md text-label-md">Wishlist</span>
+</a>
+<a class="text-text-secondary hover:text-on-surface hover:bg-surface-container px-4 py-3 flex items-center gap-3 transition-colors rounded-lg opacity-70" href="#">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="font-label-md text-label-md">Collections</span>
+</a>
+<a class="text-text-secondary hover:text-on-surface hover:bg-surface-container px-4 py-3 flex items-center gap-3 transition-colors rounded-lg opacity-70" href="#">
+<span class="material-symbols-outlined">insights</span>
+<span class="font-label-md text-label-md">Insights</span>
+</a>
+</div>
+<div class="px-4 mt-auto space-y-0.5">
+<a class="text-text-secondary hover:text-on-surface hover:bg-surface-container px-4 py-3 flex items-center gap-3 transition-colors rounded-lg opacity-70" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+<a class="text-text-secondary hover:text-on-surface hover:bg-surface-container px-4 py-3 flex items-center gap-3 transition-colors rounded-lg opacity-70" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="pl-sidebar-width min-h-screen flex flex-col">
+<!-- TopNavBar (Shared Component) -->
+<header class="sticky top-0 z-30 flex items-center justify-between w-full h-16 px-page-padding-desktop bg-surface/80 backdrop-blur-md border-b border-border-subtle">
+<div class="flex-1 max-w-md">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full bg-surface-container border border-transparent rounded-full py-2 pl-10 pr-4 text-body-md font-body-md text-primary placeholder:text-text-secondary focus:bg-surface-container-high focus:border-outline focus:ring-0 transition-all outline-none" placeholder="Search library..." type="text">
+</div>
+</div>
+<div class="flex items-center gap-4 ml-4">
+<button class="text-text-secondary hover:text-primary transition-colors w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-text-secondary hover:text-primary transition-colors w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined">history</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-border-subtle">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A minimalist avatar portrait of a user, stylized in dark mode with deep shadows and soft ambient blue lighting, simple shapes, highly professional and understated." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsAxcLfhUBKrt7yHCWG37rI83D_sTbz5ueu2v74g-CWjO4LWeD3bU4ts8wtkAfyvMhjM5B97Y9GdG8rWbkWnyr4n8BZszQQMWVTitvV1Nioz7DbyxHz8l9lHCUEjPGWlenkCQ1gSU_uHw0lK6wMJ4nhSX1pFoo6XRMWPk3nJ1csAhwR1GXhwHiNJAZC3yrEPo2kpGDbJwi11oN3H8F3q0MtHzEkmE6ZCIiyuAlojV5B2nTCk4HACOKAA">
+</div>
+</div>
+</header>
+<!-- Dashboard Content -->
+<main class="flex-1 p-page-padding-desktop max-w-[1400px] w-full mx-auto gap-12 px-page-padding-desktop">
+<header class="mb-12">
+<h2 class="font-headline-h1 text-headline-h1 mb-2 font-light tracking-tight">Welcome back.</h2>
+<p class="font-body-lg text-body-lg text-text-secondary">You are 65% through your current read.</p>
+</header>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter mb-16">
+<!-- Priority 1: Continue Reading (Hero Card) -->
+<div class="lg:col-span-8 rounded-xl p-card-padding-lg flex flex-col sm:flex-row gap-8 relative overflow-hidden group border-border-subtle/50">
+<!-- Subtle background glow -->
+<div class="absolute -top-24 -right-24 w-64 h-64 bg-primary-container/10 rounded-full blur-3xl group-hover:bg-primary-container/20 transition-all duration-700"></div>
+<div class="w-full flex-shrink-0 relative z-10 sm:w-64">
+<img alt="Current Read" class="w-full aspect-[2/3] object-cover rounded-lg shadow-[0_10px_30px_-10px_rgba(0,0,0,0.8)]" data-alt="A striking minimalist book cover design in a dark setting, featuring abstract geometric mountain shapes in deep purples and stark whites, smooth matte texture, dramatic top-down lighting creating a tactile physical feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcRhmhp50QTx0ahx8WFRVTEu7BzVjEGyLisBmFPOUblCeiJrdNUnLIz7wlr1fXbILY5L2hv0wSbijOJ54dRnVu3IzjJek5BdzFABj2ywQGB6LMWhUMJh7_v7Y1RKZVo8ySogtkw5tljr1A4_crqsl4xXZGuLEp8lTlwXW4-jSn4udw05teaCrAkmP__tNBjcgs16rsIdm4K6534MljX4DctePu5P6NUl4gg7kR10slY94rLo4IS6wI4Q">
+</div>
+<div class="flex flex-col justify-center flex-1 relative z-10 gap-8">
+<div class="mb-6">
+<span class="inline-block px-3 py-1 rounded-full bg-surface-variant text-text-secondary font-label-md text-label-md mb-4 border border-border-subtle">Currently Reading</span>
+<h3 class="font-headline-h2 text-headline-h2 mb-2 text-primary font-semibold">The Architecture of Complexity</h3>
+<p class="font-body-md text-body-md text-text-secondary">by Herbert A. Simon</p>
+</div>
+<div class="mt-auto">
+<div class="flex justify-between font-label-md text-label-md text-text-secondary mb-2">
+<span class="">Page 241 of 370</span>
+<span class="">65%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-deep rounded-full overflow-hidden bg-surface-container">
+<div class="h-full bg-primary rounded-full" style="width: 65%;"></div>
+</div>
+<div class="mt-6 flex gap-4">
+<button class="bg-primary-container text-on-primary-container hover:bg-primary-container/90 transition-colors px-6 py-2.5 rounded-lg font-label-md text-label-md flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-size: 18px;">menu_book</span>
+                                    Resume Reading
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Priority 2: Quick Add & Stats Summary (Bento style) -->
+<div class="lg:col-span-4 flex flex-col gap-gutter"><div class="space-y-8 py-4">
+    <div class="border-primary/30 pl-6">
+        <h4 class="font-label-md text-label-md text-text-secondary uppercase tracking-wider mb-4">Reading Progress</h4>
+        <div class="space-y-2">
+            <p class="text-headline-h2 font-headline-h2 text-on-surface font-light">12 <span class="text-body-md text-text-secondary">books completed this year</span></p>
+            <p class="text-body-md text-text-secondary italic">"The more that you read, the more things you will know."</p>
+        </div>
+    </div>
+    <div class="pt-4">
+        <button class="flex items-center gap-3 text-primary hover:text-primary-container transition-colors group">
+            <span class="material-symbols-outlined bg-primary-container/10 p-2 rounded-full group-hover:bg-primary-container/20">add</span>
+            <span class="font-label-md">Log a new entry</span>
+        </button>
+    </div>
+</div></div>
+</div>
+<!-- Priority 3: Recently Added -->
+<section class="mb-16">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-headline-h3 text-headline-h3">Recently Added</h3>
+<a class="font-label-md text-label-md text-text-secondary hover:text-primary transition-colors flex items-center gap-1" href="#">
+                        View All <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+</a>
+</div>
+<div class="flex overflow-x-auto hide-scrollbar gap-6 pb-8 -mx-page-padding-desktop px-page-padding-desktop">
+<!-- Book Item 1 -->
+<div class="w-40 flex-shrink-0 group cursor-pointer hover:bg-surface-container-high p-2">
+<div class="relative w-full aspect-[2/3] rounded-lg overflow-hidden mb-4 group-hover:shadow-[0_15px_30px_-10px_rgba(128,131,255,0.2)] transition-all duration-300 group-hover:-translate-y-1">
+<img alt="Book Cover" class="w-full h-full object-cover" data-alt="A high-end book cover design in dark mode featuring an ethereal, glowing jellyfish in deep oceanic blues and blacks, elegant thin serif typography, serene and calming aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDA8BCEqL-YaZlrPp7AnJWL_MVpIsfADcHEcfNVXjfC2gGhaaEmff5LXYfV_eNUb1PTbEiaVApBXa0tnR1-erLIFR8oO9JDIItxW4iH4hG-Orh9CNVaISe0b9tFSV2sYqRRQU9XHbfzcCd0YDelgdKvFdf3tWGJCcz86BXHFPw05Id2VsjS7jnRq4s6pqfTyps4oHmCYu5m4sPzViYm7icGk33_cSTI06WIMNtX3H3et0HNU7sXl18Ucw">
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style="font-size: 32px;">play_arrow</span>
+</div>
+</div>
+<h4 class="font-label-md text-label-md text-primary truncate">The Silent Deep</h4>
+<p class="font-caption text-caption text-text-secondary truncate mt-1">Elena Rostova</p>
+</div>
+<!-- Book Item 2 -->
+<div class="w-40 flex-shrink-0 group cursor-pointer hover:bg-surface-container-high p-2">
+<div class="relative w-full aspect-[2/3] rounded-lg overflow-hidden mb-4 group-hover:shadow-[0_15px_30px_-10px_rgba(128,131,255,0.2)] transition-all duration-300 group-hover:-translate-y-1">
+<img alt="Book Cover" class="w-full h-full object-cover" data-alt="A modern minimalist book cover, mostly stark black with a single sharp diagonal streak of bright silver, clean sans-serif typography, highly professional design studio look." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGrTdC0V4H_eX4nuq24v6TQ0EqajVSAuAyNKOaKPc4hVIrdSp_BtIoi60ij6-1WYzZwnkoo9DbbdkKLlJS0DAoNQ0-l_snshjL9xvkWslIa57v7MxUONNjbm41UyDy6xLB4IgUWFZO-MJJ4MUCWf7RlW4VEFkqD5z9vGRfpfDyuGCXA6LoOYHUPgS5-GFlkwf4xP6zpuVa4eBW6IBOoVnKEQsdGxkdH1clXrkSFHcP7AT25N6VVwnp2w">
+</div>
+<h4 class="font-label-md text-label-md text-primary truncate">Oblique Strategies</h4>
+<p class="font-caption text-caption text-text-secondary truncate mt-1">Brian Eno</p>
+</div>
+<!-- Book Item 3 -->
+<div class="w-40 flex-shrink-0 group cursor-pointer hover:bg-surface-container-high p-2">
+<div class="relative w-full aspect-[2/3] rounded-lg overflow-hidden mb-4 group-hover:shadow-[0_15px_30px_-10px_rgba(128,131,255,0.2)] transition-all duration-300 group-hover:-translate-y-1">
+<img alt="Book Cover" class="w-full h-full object-cover" data-alt="A calm, neutral dark book cover featuring a subtle, soft-focus photograph of a foggy forest at dusk, muted greens and grays, elegant aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDET3mYIvl3Wr9Yo4YdYgEGbU6uDQJLMH_qzRqvyeKiYhQTJmaXu8LN0M1gRJHd6c_5KH_3kiYbmmL9eOjri28XXJIJLVTM8DtrlR2xg79DF4ZgNazABAUzRUE_NVoqPjIbaCj_8Hofzf2em-yCFUuWG22_Hvajs3qYrSWjnfQJ8MKSV7jIQqO6dodGRy2ePPCgAeyWHwKicDUHTWg5CKE9xDH9-SSdQ48qdE_FwDEWJjmxfB2ItTZKuw">
+</div>
+<h4 class="font-label-md text-label-md text-primary truncate">Whispers of Timber</h4>
+<p class="font-caption text-caption text-text-secondary truncate mt-1">J.K. Aris</p>
+</div>
+<!-- Book Item 4 -->
+<div class="w-40 flex-shrink-0 group cursor-pointer hover:bg-surface-container-high p-2">
+<div class="relative w-full aspect-[2/3] rounded-lg overflow-hidden mb-4 group-hover:shadow-[0_15px_30px_-10px_rgba(128,131,255,0.2)] transition-all duration-300 group-hover:-translate-y-1">
+<img alt="Book Cover" class="w-full h-full object-cover" data-alt="A sleek dark mode book cover with a central glowing amber orb against a matte black background, futuristic yet understated, high quality finish." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0FLIEKwe16Nw0XFPszfFYkCNq0618xA8wGeews8FXR4zRV844CoYTzr9342qTdPInNUSMO2hU2TfBhDGsWvJ7f-PeOA_JlZLFTkVr7x-LGZKZneYpKam1AHSwWzvHmmn8zi7M935R-jHuthGLDDBqCfVJv74oiCM-E31-d51Eq2OGvhg4tHALSmZ4mikj_BQ_Mppbz2eAc9ai12OCGOEXV1v59ZwYfolO9rDCba-HxjsEINikpuka3g">
+</div>
+<h4 class="font-label-md text-label-md text-primary truncate">The Amber Node</h4>
+<p class="font-caption text-caption text-text-secondary truncate mt-1">Sarah Lin</p>
+</div>
+<!-- Empty State / Add more -->
+<div class="w-40 flex-shrink-0 border border-dashed border-border-subtle rounded-lg aspect-[2/3] flex flex-col items-center justify-center text-text-secondary hover:bg-surface-container hover:text-primary transition-colors cursor-pointer mb-4">
+<span class="material-symbols-outlined mb-2">library_add</span>
+<span class="font-label-md text-label-md">Browse More</span>
+</div>
+</div>
+</section>
+<!-- Priority 4 & 5: Recommendations & Activity Split -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+<!-- Recommendations -->
+<section>
+<h3 class="font-headline-h3 text-headline-h3 mb-6">Up Next for You</h3>
+<div class="space-y-4">
+<div class="p-4 rounded-xl border-border-subtle flex gap-4 hover:bg-surface-container transition-colors cursor-pointer group">
+<img alt="Rec Cover" class="w-16 h-24 object-cover rounded shadow-sm group-hover:shadow-md transition-shadow" data-alt="A sophisticated book cover featuring intricate architectural line drawings in pale gold on a dark charcoal background, classic typography, timeless aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdleJDsv0tZtA7vMH0PqawYH6mVoRcBYAGdUDppfgsMTBeb2e2xpNvyq4UBJF4Q_Ejur-hCy39P-mMCr5AcTC7F55HN6o-u7AhUJeG6lnV5r0ioJZLj67wLZAn907e864Pl7v0BNIf7240Z8qGwrwubMhZfVBkZ9sqH0d4VBRVJJK6WFrpanlFguKhCgDfOhwdNrR4h4bfMrfR65LPw3VpICrAQx3pPQ3awkOaxQ4I0rffxhmGxmIWVQ">
+<div class="flex-1 flex flex-col justify-center">
+<h4 class="font-label-md text-label-md text-primary mb-1">Design of Everyday Things</h4>
+<p class="font-caption text-caption text-text-secondary mb-3">Don Norman</p>
+<p class="font-caption text-caption text-text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-primary-container" style="font-size: 14px;">auto_awesome</span>
+                                    Based on your reading history
+                                </p>
+</div>
+</div>
+<div class="p-4 rounded-xl border-border-subtle flex gap-4 hover:bg-surface-container transition-colors cursor-pointer group">
+<img alt="Rec Cover" class="w-16 h-24 object-cover rounded shadow-sm group-hover:shadow-md transition-shadow" data-alt="A minimal dark mode book cover with a soft gradient mesh of deep purple and navy blue, very clean sans serif white text, tech-focused but calm." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIMOnn0XvJjhr2bFYS1ibB-OrSECa0g0OFiAVXKyk_XSDR0gg_B9rlZSJNWYgHb-1Eqh1ecMwNmVcQH6xsDrdiE6Qk_uBg5qgsw2J9aaKQwAzwEgjlKmT1rCt1TR8bWyzUUWeVs6xVTXUI5l_WQp5BrUDtX1K_-NANqaNUCpDJ8mToougZwjWTm9KpvOYwIf-5qiWcOOACcT0ewgwqyQvX8wDEVs6VKgDpGIPsMIwnJBl2bv-gT_HMrg">
+<div class="flex-1 flex flex-col justify-center">
+<h4 class="font-label-md text-label-md text-primary mb-1">Deep Work</h4>
+<p class="font-caption text-caption text-text-secondary mb-3">Cal Newport</p>
+<p class="font-caption text-caption text-text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-primary-container" style="font-size: 14px;">auto_awesome</span>
+                                    Highly rated in Productivity
+                                </p>
+</div>
+</div>
+</div>
+</section>
+<!-- Activity (Muted) -->
+<section>
+<h3 class="font-headline-h3 text-headline-h3 mb-6 text-text-secondary">Recent Activity</h3>
+<div class="relative pl-4 border-l border-border-subtle space-y-6">
+<div class="relative">
+<div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-surface-variant border border-border-subtle"></div>
+<p class="font-body-md text-body-md text-primary mb-1">Finished reading <span class="text-on-surface font-medium">Dune</span></p>
+<p class="font-caption text-caption text-text-secondary">Yesterday</p>
+</div>
+<div class="relative">
+<div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-surface-variant border border-border-subtle"></div>
+<p class="font-body-md text-body-md text-primary mb-1">Added 3 books to <span class="text-on-surface font-medium">Design Research</span></p>
+<p class="font-caption text-caption text-text-secondary">3 days ago</p>
+</div>
+<div class="relative">
+<div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-surface-variant border border-border-subtle"></div>
+<p class="font-body-md text-body-md text-primary mb-1">Reached 50% in <span class="text-on-surface font-medium">The Architecture of Complexity</span></p>
+<p class="font-caption text-caption text-text-secondary">Last week</p>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+
+
+
+
+
+
+</body></html>

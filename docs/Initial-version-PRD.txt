@@ -1,0 +1,475 @@
+# Book Catalog
+
+**Version:** 1.0
+**Author:** Aryan Yadav
+**Status:** Planning
+**Last Updated:** August 2026
+
+---
+
+# 1. Project Overview
+
+## Vision
+
+Book Catalog is a personal library management system that allows users to quickly catalog physical books by taking a photo of the cover or ISBN barcode. The application automatically fetches book metadata, stores it in a searchable library, and provides analytics about the collection.
+
+The long-term goal is to evolve the project from a personal utility into a family library platform with intelligent recommendations, reading analytics, and advanced search capabilities.
+
+---
+
+# 2. Problem Statement
+
+Managing a physical library becomes difficult as the collection grows.
+
+Common problems include:
+
+* Forgetting which books are already owned
+* Not remembering where a book is placed
+* Difficulty searching the collection
+* No overview of reading progress
+* No insights into reading habits
+* No easy way to discover similar books already owned
+
+The goal of this project is to solve these problems with minimal manual effort.
+
+---
+
+# 3. Goals
+
+## Primary Goals
+
+* Make adding books extremely easy.
+* Automatically identify books from a photo.
+* Minimize manual data entry.
+* Provide a clean and searchable catalog.
+* Track reading progress.
+* Generate useful statistics about the library.
+* Keep running costs as close to zero as possible.
+
+---
+
+# 4. Non-Goals (Version 1)
+
+The following features will **not** be implemented initially:
+
+* User authentication
+* Social features
+* Public profiles
+* Online marketplace
+* Book reviews from other users
+* Notifications
+* Cloud hosting
+* Payments
+
+---
+
+# 5. Target Users
+
+## Initial
+
+Only the project owner.
+
+## Future
+
+Family members sharing a household library.
+
+---
+
+# 6. Success Criteria
+
+The project will be considered successful if a user can:
+
+* Add a new book in under 10 seconds.
+* Search any book instantly.
+* Browse the library easily.
+* View useful information about every book.
+* Track reading status.
+* Find books quickly.
+
+---
+
+# 7. Functional Requirements
+
+## FR-1 Add Book
+
+The user should be able to add a book by:
+
+* Taking a picture
+* Uploading an image
+* Entering ISBN manually (optional)
+
+---
+
+## FR-2 Automatic Identification
+
+The system should:
+
+1. Detect ISBN barcode if available.
+2. If no barcode is found, perform OCR.
+3. Search book databases.
+4. If unsuccessful, use an AI Vision model.
+5. Return metadata automatically.
+
+---
+
+## FR-3 Book Details
+
+Each book should contain:
+
+* Title
+* Subtitle
+* Authors
+* ISBN
+* Publisher
+* Published Year
+* Page Count
+* Language
+* Genre
+* Subjects
+* Description
+* Cover Image
+* User Photo
+* Date Added
+
+---
+
+## FR-4 Personal Metadata
+
+The user should be able to manage:
+
+* Reading Status
+* Rating
+* Notes
+* Shelf Location
+* Purchase Date
+* Purchase Price (optional)
+* Favorite
+* Tags
+
+---
+
+## FR-5 Search
+
+Search by:
+
+* Title
+* Author
+* ISBN
+* Genre
+* Publisher
+* Tags
+
+---
+
+## FR-6 Filtering
+
+Filter by:
+
+* Read
+* Unread
+* Currently Reading
+* Favorites
+* Genre
+* Author
+* Rating
+* Publication Year
+
+---
+
+## FR-7 Dashboard
+
+Display:
+
+* Total Books
+* Books Read
+* Books Unread
+* Books Currently Reading
+* Favorite Books
+
+---
+
+# 8. Future Features
+
+## Family Accounts
+
+* Multiple users
+* Individual libraries
+* Shared library
+
+---
+
+## Reading Progress
+
+Track:
+
+* Current page
+* Completion %
+* Reading history
+
+---
+
+## Recommendations
+
+Suggest:
+
+* Similar books in library
+* Similar books not owned
+* Missing books in a series
+* Books by favorite authors
+
+---
+
+## AI Features
+
+* Automatic tags
+* Personalized recommendations
+* Reading insights
+* Collection analysis
+
+---
+
+## Analytics
+
+Examples:
+
+* Books per genre
+* Books per author
+* Reading history
+* Reading speed
+* Pages read per month
+* Publication year distribution
+* Publisher statistics
+* Collection value (optional)
+
+---
+
+## Shelf Scanning
+
+Scan an entire bookshelf in one photo.
+
+---
+
+## Barcode-only Mode
+
+Fast scanning for large collections.
+
+---
+
+# 9. Non-Functional Requirements
+
+The application should:
+
+* Be fast.
+* Be responsive.
+* Work well on desktop.
+* Have minimal dependencies.
+* Be easy to back up.
+* Be Dockerized.
+* Be easy to deploy.
+* Have modular architecture.
+* Be maintainable.
+
+---
+
+# 10. Technology Stack (Initial)
+
+## Frontend
+
+* React
+* Vite
+* TypeScript
+* Tailwind CSS
+
+---
+
+## Backend
+
+* FastAPI
+* Python
+
+---
+
+## Database
+
+* PostgreSQL
+
+---
+
+## ORM
+
+* SQLAlchemy
+
+---
+
+## Image Processing
+
+* Barcode Detection
+* OCR
+
+---
+
+## Metadata Sources
+
+Primary:
+
+* Open Library API
+
+Secondary:
+
+* Google Books API
+
+Fallback:
+
+* Gemini Vision
+
+---
+
+## Deployment
+
+Development:
+
+* Docker Compose
+
+Future:
+
+* AWS or Google Cloud
+
+---
+
+# 11. High-Level Workflow
+
+```
+User uploads photo
+
+↓
+
+Detect ISBN
+
+↓
+
+Found?
+
+├── Yes
+│
+│   Search Book APIs
+│
+│   Metadata Found?
+│
+│   ├── Yes
+│   │
+│   │   Save Book
+│   │
+│   └── No
+│
+└── No
+
+OCR
+
+↓
+
+Search APIs
+
+↓
+
+Found?
+
+├── Yes
+│
+│ Save Book
+│
+└── No
+
+Gemini Vision
+
+↓
+
+Generate Metadata
+
+↓
+
+Save Book
+```
+
+---
+
+# 12. Project Phases
+
+## Phase 1
+
+Personal Library MVP
+
+* Add books
+* Search
+* Dashboard
+* Filtering
+* Notes
+* Docker
+
+---
+
+## Phase 2
+
+Better Organization
+
+* Tags
+* Shelf locations
+* Better search
+* Statistics
+* Better UI
+
+---
+
+## Phase 3
+
+Intelligence
+
+* Similar books
+* AI recommendations
+* Reading analytics
+* Smart collections
+
+---
+
+## Phase 4
+
+Family Support
+
+* User accounts
+* Shared libraries
+* Reading progress
+* Family analytics
+
+---
+
+## Phase 5
+
+Mobile Application
+
+* Android
+* iOS
+* Barcode scanning
+* Offline mode
+* Synchronization
+
+---
+
+# 13. Guiding Principles
+
+Every feature added to this project should satisfy at least one of the following:
+
+* Makes cataloging faster.
+* Makes finding books easier.
+* Provides meaningful insights.
+* Reduces manual work.
+* Improves organization.
+* Keeps the application simple and maintainable.
+
+If a feature does not satisfy any of the above, it should be reconsidered before implementation.
+
+---
+
+# 14. Future Vision
+
+Book Catalog should eventually become an intelligent personal library assistant.
+
+Instead of being only a database of books, it should help users understand their collection, discover new books, identify reading patterns, and make better reading decisions while remaining private, affordable, and easy to maintain.

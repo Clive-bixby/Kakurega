@@ -1,0 +1,324 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Lexicon - Settings</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#ffdad6",
+                        "surface-container-low": "#1a1c20",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "inverse-surface": "#e2e2e8",
+                        "surface-container-lowest": "#0c0e12",
+                        "error-container": "#93000a",
+                        "on-secondary-container": "#a7b6cc",
+                        "on-primary-container": "#0d0096",
+                        "on-tertiary-container": "#452000",
+                        "secondary": "#b9c8de",
+                        "surface-container-high": "#282a2e",
+                        "primary-container": "#8083ff",
+                        "tertiary-container": "#d97721",
+                        "inverse-on-surface": "#2f3035",
+                        "surface-variant": "#333539",
+                        "on-secondary": "#233143",
+                        "on-primary-fixed": "#07006c",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "surface-container": "#1e2024",
+                        "primary-fixed": "#e1e0ff",
+                        "outline": "#908fa0",
+                        "on-primary": "#1000a9",
+                        "text-primary": "#F8FAFC",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "accent-purple-dim": "#312E81",
+                        "tertiary": "#ffb783",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "on-surface-variant": "#c7c4d7",
+                        "on-surface": "#e2e2e8",
+                        "border-subtle": "#2D333D",
+                        "tertiary-fixed": "#ffdcc5",
+                        "surface-bright": "#37393e",
+                        "surface-deep": "#16191F",
+                        "inverse-primary": "#494bd6",
+                        "error": "#ffb4ab",
+                        "surface": "#111317",
+                        "surface-muted": "#1E2229",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "on-background": "#e2e2e8",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "text-secondary": "#94A3B8",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "background": "#111317",
+                        "on-tertiary-fixed": "#301400",
+                        "secondary-fixed": "#d4e4fa",
+                        "secondary-container": "#39485a",
+                        "on-tertiary": "#4f2500",
+                        "on-error": "#690005",
+                        "outline-variant": "#464554",
+                        "surface-container-highest": "#333539",
+                        "primary": "#c0c1ff",
+                        "surface-dim": "#111317",
+                        "surface-tint": "#c0c1ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "content-max-width": "1200px",
+                        "gutter": "24px",
+                        "page-padding-mobile": "24px",
+                        "card-padding-lg": "32px",
+                        "page-padding-desktop": "40px",
+                        "card-padding-md": "24px",
+                        "sidebar-width": "260px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter", "sans-serif"],
+                        "caption": ["Inter", "sans-serif"],
+                        "headline-h3": ["Inter", "sans-serif"],
+                        "display-lg": ["Inter", "sans-serif"],
+                        "headline-h1": ["Inter", "sans-serif"],
+                        "body-lg": ["Inter", "sans-serif"],
+                        "headline-h2": ["Inter", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "caption": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-h3": ["20px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-h1": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-h2": ["24px", { "lineHeight": "32px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom toggle styles to keep HTML clean */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #8083ff; /* primary-container */
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #8083ff; /* primary-container */
+        }
+        .toggle-checkbox {
+            right: 0;
+            z-index: 1;
+            border-color: transparent;
+            transition: all 0.2s ease;
+        }
+        .toggle-label {
+            transition: all 0.2s ease;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md text-body-md antialiased selection:bg-primary-fixed-dim selection:text-on-primary-fixed min-h-screen flex flex-col">
+<!-- Shared Component: SideNavBar -->
+<nav class="docked h-screen w-sidebar-width left-0 top-0 flex flex-col border-border-subtle bg-surface-deep dark:bg-surface-deep fixed h-full z-40 py-6">
+<!-- Header -->
+<div class="px-6 mb-8 flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center overflow-hidden">
+<img alt="Lexicon App Logo" class="w-full h-full object-cover opacity-80" data-alt="A highly detailed 3D rendered, minimalist geometric logo featuring stylized book pages forming an abstract letter L, illuminated with soft ambient studio lighting against a dark moody background, showcasing a premium modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCtAp_96iUux9HB_9bN2VlYOgRb9jhaDT74aLBwIDDMLv79c7U1wDm4eMcgaeXkChKjUnofHSecDlDrAd732NEwaCZgCkfTkzUO2OqBvWMtgFod3iU68VfJmcfe5xS-4yqWXn6Cloyb8AmY3TovVIBZSJHRLw2LcN2VzvoAnAgTiBPGpeyZ60erO95N674VxwYWQeccsdwmV6E_IlWVVszE0gIG-xOtC4RYf1yQMVMjM-zGwF3udZzzA">
+</div>
+<div>
+<h1 class="font-headline-h2 text-headline-h2 text-primary tracking-tight">Lexicon</h1>
+<p class="font-caption text-caption text-text-secondary">Personal Library</p>
+</div>
+</div>
+<!-- Main Tabs -->
+<div class="flex-1 flex flex-col overflow-y-auto px-2 gap-2">
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container font-label-md text-label-md rounded-lg opacity-80" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+                Dashboard
+            </a>
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container font-label-md text-label-md rounded-lg opacity-80" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">local_library</span>
+                Library
+            </a>
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container font-label-md text-label-md rounded-lg opacity-80" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu_book</span>
+                Reading Now
+            </a>
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container font-label-md text-label-md rounded-lg opacity-80" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">bookmark_add</span>
+                Wishlist
+            </a>
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container font-label-md text-label-md rounded-lg opacity-80" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">auto_stories</span>
+                Collections
+            </a>
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container font-label-md text-label-md rounded-lg opacity-80" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">insights</span>
+                Insights
+            </a>
+</div>
+<!-- Footer Tabs -->
+<div class="px-2 mt-auto flex flex-col pt-4 border-t border-border-subtle mx-4 gap-2">
+<!-- Active State: Settings -->
+<a class="bg-surface-container-high text-primary rounded-lg mx-2 px-4 py-3 flex items-center gap-3 font-label-md text-label-md hover:bg-surface-container transition-colors relative" href="#">
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-full"></div>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+                Settings
+            </a>
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">help</span>
+                Support
+            </a>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col pl-[260px]">
+<!-- Shared Component: TopNavBar -->
+<header class="docked full-width top-0 sticky bg-surface/80 dark:bg-surface/80 backdrop-blur-md border-b border-border-subtle flex items-center justify-between w-full h-16 px-page-padding-desktop z-30">
+<!-- Search (Left aligned per JSON intent, pushing actions to right) -->
+<div class="flex-1 flex items-center max-w-md">
+<div class="relative w-full group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full bg-surface-container rounded-full pl-10 pr-4 py-2 border border-transparent focus:border-outline-variant focus:ring-0 focus:bg-surface-container-high transition-colors font-body-md text-body-md text-on-surface placeholder:text-text-secondary" placeholder="Search..." type="text">
+</div>
+</div>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-6">
+<button class="text-text-secondary hover:text-primary transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-primary-container rounded-full ring-2 ring-surface"></span>
+</button>
+<button class="text-text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined">history</span>
+</button>
+<button class="w-8 h-8 rounded-full overflow-hidden border border-border-subtle hover:border-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary-container">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A close-up portrait of a thoughtful person in a modern, subtly lit environment, wearing dark minimalist clothing, exuding a calm and intellectual aura, suitable for a premium application user profile picture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwNhtOmW4K0Dc8JnvLJiS_Nb-d0ADzEoxoa-YgAWqyxILQFKpWBHpI2OzbfDdfaG4-xohaGCLAcqaiIiUdoARzDW2IBIRI9zgLaqNcD9qoOyyrdGlEIKb6peuS4nNWKfANaLgTJoipQrtdp5zdcgzz8TbHw5R6-A21cODNZzhYOef36AUMo-SN6E8xB3qU6Zov3YNbIgr07ABLE4ZJcWHNPzddhfM9Rv2ffbi7rBtww-GV-zDGTLpiKw">
+</button>
+</div>
+</header>
+<!-- Page Content: Settings Canvas -->
+<main class="flex-1 p-page-padding-desktop flex flex-col md:flex-row gap-16 max-w-content-max-width mx-auto w-full">
+<!-- Settings Sidebar (Inner Navigation) -->
+<aside class="w-full md:w-64 flex-shrink-0 flex flex-col gap-2 pt-4">
+<h2 class="font-label-md text-label-md text-text-secondary uppercase tracking-widest mb-6 px-4">Settings</h2>
+<nav class="flex flex-col gap-1">
+<!-- Active Inner Tab -->
+<a class="px-4 py-2.5 rounded-lg bg-surface-container text-primary font-label-md text-label-md transition-colors flex justify-between items-center group" href="#">
+                        General
+                        <span class="material-symbols-outlined text-[18px] opacity-100 transition-opacity">chevron_right</span>
+</a>
+<!-- Inactive Inner Tabs -->
+<a class="px-4 py-2.5 rounded-lg text-text-secondary hover:bg-surface-container-highest hover:text-on-surface font-label-md text-label-md transition-colors flex justify-between items-center group" href="#">
+                        Account
+                        <span class="material-symbols-outlined text-[18px] opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+</a>
+<a class="px-4 py-2.5 rounded-lg text-text-secondary hover:bg-surface-container-highest hover:text-on-surface font-label-md text-label-md transition-colors flex justify-between items-center group" href="#">
+                        Integrations
+                        <span class="material-symbols-outlined text-[18px] opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+</a>
+<a class="px-4 py-2.5 rounded-lg text-text-secondary hover:bg-surface-container-highest hover:text-on-surface font-label-md text-label-md transition-colors flex justify-between items-center group" href="#">
+                        Library Display
+                        <span class="material-symbols-outlined text-[18px] opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+</a>
+</nav>
+</aside>
+<!-- Settings Canvas (General) -->
+<section class="flex-1 max-w-2xl gap-16 flex-col gap-12">
+<!-- Preferred Library View -->
+<div class="bg-surface-container-low p-card-padding-lg rounded-xl border border-border-subtle/50">
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface mb-2">Preferred Library View</h3>
+<p class="font-body-md text-body-md text-text-secondary mb-8">Choose how your book collection is displayed by default.</p>
+<div class="flex items-center gap-4 rounded-xl w-fit"><button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-highest text-primary font-label-md text-label-md border border-primary/20 transition-all"><span class="material-symbols-outlined text-[18px]">grid_view</span>Grid</button><button class="flex items-center gap-2 px-4 py-2 rounded-lg text-text-secondary hover:text-on-surface font-label-md text-label-md transition-all"><span class="material-symbols-outlined text-[18px]">view_list</span>List</button></div>
+</div>
+<!-- Appearance / Dark Mode -->
+<div class="bg-surface-container-low p-card-padding-lg rounded-xl border border-border-subtle/50">
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface mb-2">Appearance</h3>
+<p class="font-body-md text-body-md text-text-secondary mb-8">Customize the application's theme to suit your environment.</p>
+<div class="flex items-center justify-between rounded-xl hover:border-outline-variant transition-colors group">
+<div class="flex items-start gap-4">
+<div class="p-3 bg-surface-container-highest rounded-full text-text-secondary group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">dark_mode</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Dark Mode</h4>
+<p class="font-caption text-caption text-text-secondary mt-1">Use dark visuals for a low-glare reading experience.</p>
+</div>
+</div>
+<!-- Toggle Switch -->
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer translate-x-6" id="dark-mode-toggle" name="toggle" type="checkbox">
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-primary-container cursor-pointer" for="dark-mode-toggle"></label>
+</div>
+</div>
+</div>
+<!-- Default Tags -->
+<div class="bg-surface-container-low p-card-padding-lg rounded-xl border border-border-subtle/50">
+<h3 class="font-headline-h3 text-headline-h3 text-on-surface mb-2">Default Tags</h3>
+<p class="font-body-md text-body-md text-text-secondary mb-8">Manage the standard taxonomy applied to new additions in your library.</p>
+<div class="flex flex-col gap-6">
+<!-- Add Tag Input -->
+<div class="flex gap-4">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-[20px]">sell</span>
+<input class="w-full bg-surface-container-highest/50 rounded-lg pl-10 pr-4 py-2.5 border border-border-subtle focus:border-primary focus:ring-0 transition-colors font-body-md text-body-md text-on-surface placeholder:text-text-secondary/50" placeholder="Enter a new tag..." type="text">
+</div>
+<button class="bg-primary-container hover:bg-primary-fixed text-on-primary-container font-label-md text-label-md px-6 py-3 rounded-lg transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                                Add Tag
+                            </button>
+</div>
+<!-- Tag Cloud -->
+<div class="flex flex-wrap gap-3">
+<div class="group flex items-center gap-2 pl-4 pr-2 py-1.5 bg-surface-container rounded-full border border-border-subtle hover:border-outline-variant transition-colors">
+<span class="font-label-md text-label-md text-on-surface">Currently Reading</span>
+<button class="w-6 h-6 rounded-full flex items-center justify-center text-text-secondary group-hover:bg-surface-container-highest group-hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<div class="group flex items-center gap-2 pl-4 pr-2 py-1.5 bg-surface-container rounded-full border border-border-subtle hover:border-outline-variant transition-colors">
+<span class="font-label-md text-label-md text-on-surface">Design Theory</span>
+<button class="w-6 h-6 rounded-full flex items-center justify-center text-text-secondary group-hover:bg-surface-container-highest group-hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<div class="group flex items-center gap-2 pl-4 pr-2 py-1.5 bg-surface-container rounded-full border border-border-subtle hover:border-outline-variant transition-colors">
+<span class="font-label-md text-label-md text-on-surface">Fiction</span>
+<button class="w-6 h-6 rounded-full flex items-center justify-center text-text-secondary group-hover:bg-surface-container-highest group-hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<div class="group flex items-center gap-2 pl-4 pr-2 py-1.5 bg-surface-container rounded-full border border-border-subtle hover:border-outline-variant transition-colors">
+<span class="font-label-md text-label-md text-on-surface">To Read</span>
+<button class="w-6 h-6 rounded-full flex items-center justify-center text-text-secondary group-hover:bg-surface-container-highest group-hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Save Actions -->
+<div class="pt-8 border-t border-border-subtle flex justify-end gap-4 mt-8">
+<button class="px-6 py-2.5 rounded-lg text-text-secondary hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors">
+                        Discard Changes
+                    </button>
+<button class="px-6 py-2.5 rounded-lg bg-inverse-primary hover:bg-primary-fixed text-on-primary font-label-md text-label-md transition-colors shadow-sm">
+                        Save Preferences
+                    </button>
+</div>
+</section>
+</main>
+</div>
+
+
+</body></html>

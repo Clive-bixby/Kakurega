@@ -1,0 +1,367 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><svg class="inline-defs-container" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"></svg><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Lexicon - Insights</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "text-primary": "#F8FAFC",
+                      "on-tertiary-fixed-variant": "#703700",
+                      "on-secondary-fixed-variant": "#39485a",
+                      "on-error-container": "#ffdad6",
+                      "surface-container-highest": "#333539",
+                      "on-surface": "#e2e2e8",
+                      "secondary-fixed-dim": "#b9c8de",
+                      "on-secondary": "#233143",
+                      "tertiary-fixed": "#ffdcc5",
+                      "surface-container-high": "#282a2e",
+                      "surface-dim": "#111317",
+                      "secondary-container": "#39485a",
+                      "primary-fixed-dim": "#c0c1ff",
+                      "primary": "#c0c1ff",
+                      "surface-bright": "#37393e",
+                      "error": "#ffb4ab",
+                      "on-error": "#690005",
+                      "inverse-surface": "#e2e2e8",
+                      "surface-container": "#1e2024",
+                      "secondary-fixed": "#d4e4fa",
+                      "on-secondary-fixed": "#0d1c2d",
+                      "inverse-primary": "#494bd6",
+                      "on-surface-variant": "#c7c4d7",
+                      "background": "#111317",
+                      "tertiary-fixed-dim": "#ffb783",
+                      "tertiary": "#ffb783",
+                      "tertiary-container": "#d97721",
+                      "on-secondary-container": "#a7b6cc",
+                      "surface-muted": "#1E2229",
+                      "inverse-on-surface": "#2f3035",
+                      "on-primary-fixed": "#07006c",
+                      "accent-purple-dim": "#312E81",
+                      "surface-tint": "#c0c1ff",
+                      "primary-container": "#8083ff",
+                      "outline": "#908fa0",
+                      "on-primary-fixed-variant": "#2f2ebe",
+                      "on-primary": "#1000a9",
+                      "on-background": "#e2e2e8",
+                      "on-tertiary-container": "#452000",
+                      "primary-fixed": "#e1e0ff",
+                      "border-subtle": "#2D333D",
+                      "text-secondary": "#94A3B8",
+                      "on-tertiary": "#4f2500",
+                      "surface-variant": "#333539",
+                      "on-tertiary-fixed": "#301400",
+                      "surface-deep": "#16191F",
+                      "surface-container-low": "#1a1c20",
+                      "surface": "#111317",
+                      "surface-container-lowest": "#0c0e12",
+                      "secondary": "#b9c8de",
+                      "outline-variant": "#464554",
+                      "error-container": "#93000a",
+                      "on-primary-container": "#0d0096"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "unit": "8px",
+                      "card-padding-lg": "32px",
+                      "gutter": "24px",
+                      "sidebar-width": "260px",
+                      "page-padding-mobile": "24px",
+                      "page-padding-desktop": "40px",
+                      "content-max-width": "1200px",
+                      "card-padding-md": "24px"
+              },
+              "fontFamily": {
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-h3": [
+                              "Inter"
+                      ],
+                      "headline-h2": [
+                              "Inter"
+                      ],
+                      "headline-h1": [
+                              "Inter"
+                      ],
+                      "caption": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-h3": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-h2": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-h1": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "caption": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex selection:bg-primary-container selection:text-on-primary-container">
+<!-- SideNavBar -->
+<nav aria-label="Main Navigation" class="hidden md:flex bg-surface-deep dark:bg-surface-deep docked h-screen w-sidebar-width left-0 top-0 flex-col border-border-subtle fixed z-40 py-6">
+<div class="px-6 mb-8">
+<h1 class="text-headline-h3 font-headline-h3 font-semibold text-on-surface">Lexicon</h1>
+<p class="font-caption text-caption text-text-secondary mt-1">Personal Library</p>
+</div>
+<div class="flex-1 overflow-y-auto space-y-1 mt-4">
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container rounded-lg group opacity-80" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container rounded-lg group opacity-80" href="#">
+<span class="material-symbols-outlined" data-icon="local_library">local_library</span>
+<span class="font-label-md text-label-md">Library</span>
+</a>
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container rounded-lg group opacity-80" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-label-md text-label-md">Reading Now</span>
+</a>
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container rounded-lg group opacity-80" href="#">
+<span class="material-symbols-outlined" data-icon="bookmark_add">bookmark_add</span>
+<span class="font-label-md text-label-md">Wishlist</span>
+</a>
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container rounded-lg group opacity-80" href="#">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="font-label-md text-label-md">Collections</span>
+</a>
+<a class="bg-surface-container-high/50 text-primary rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all duration-200 active:scale-[0.98] relative" href="#">
+<div class="absolute left-0 top-2 bottom-2 w-1 bg-primary rounded-full"></div>
+<span class="material-symbols-outlined" data-icon="insights" style="font-variation-settings: 'FILL' 1;">insights</span>
+<span class="font-label-md text-label-md font-semibold">Insights</span>
+</a>
+</div>
+<div class="px-6 mt-6">
+<button class="w-full bg-primary-container text-on-primary-container font-label-md text-label-md py-3 rounded-lg hover:opacity-90 transition-opacity flex justify-center items-center gap-2">
+<span class="material-symbols-outlined">add</span>
+                Add New Book
+            </button>
+</div>
+<div class="space-y-1 mt-12">
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container rounded-lg group" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container rounded-lg group" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 md:pl-sidebar-width flex flex-col min-h-screen">
+<!-- TopNavBar -->
+<header class="bg-surface/80 dark:bg-surface/80 backdrop-blur-md docked full-width top-0 sticky flex items-center justify-between w-full h-16 px-page-padding-mobile md:px-page-padding-desktop z-30">
+<div class="flex-1 flex items-center">
+<div class="relative w-full max-w-md hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full pl-10 pr-4 py-2 font-body-md text-body-md text-on-surface placeholder:text-text-secondary focus:ring-1 focus:ring-primary-container transition-shadow" placeholder="Search insights..." type="text">
+</div>
+<h1 class="text-headline-h3 font-headline-h3 font-semibold text-on-surface md:hidden">Insights</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-text-secondary hover:text-primary transition-colors p-2 rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-text-secondary hover:text-primary transition-colors p-2 rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+</button>
+<button class="w-8 h-8 rounded-full overflow-hidden border border-border-subtle focus:outline-none focus:ring-2 focus:ring-primary-container">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A minimalist, high-quality circular avatar image of a person's silhouette against a deep purple background, suitable for a refined dark mode UI profile picture. The lighting is soft and ambient." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5yQCHy1gJ6u5mrmT1jquUjlnbBHkBvBGHimDjG2l4WpwMYSMM3b0SQMEgVkHmK0tdj-J6Wcq1St1QgFxmBYcCaGGVtK4B4MCDN7AFLrBSFeZDkh4GcpaJtyq_izMLUj2TMocsw9Q4xijrnxv5JT_fubL311fwlOM1XzxvlZI4TmEDqMQIf6yIx1Myrg5O22bvm4pMX55110Tq-JBScgTkHR1g5P0RBIym8lP5jCO75xSxIVWxAUz-og">
+</button>
+</div>
+</header>
+<!-- Insights Content -->
+<div class="p-page-padding-mobile md:p-page-padding-desktop md:pt-12 flex-1 max-w-content-max-width mx-auto w-full">
+<header class="mb-20"><h1 class="font-display-lg text-display-lg text-text-primary mb-4 font-light tracking-tight">Your Reading Journey</h1><p class="font-body-lg text-body-lg text-text-secondary font-light">A reflection of your literary exploration over the past 30 days.</p></header>
+<!-- Reading Velocity Sparkline -->
+<section class="mb-20">
+<h2 class="font-label-md text-label-md text-text-secondary uppercase tracking-widest mb-8">Pacing</h2>
+<div class="h-40 relative group">
+<svg class="absolute bottom-0 w-full h-full stroke-primary z-0 opacity-80" preserveAspectRatio="none" viewBox="0 0 1000 300">
+<path d="M0,250 C100,200 200,280 300,150 C400,20 500,100 600,120 C700,140 800,50 900,180 C950,240 1000,100 1000,100" fill="none" stroke-linecap="round" stroke-width="2"></path>
+<path d="M0,250 C100,200 200,280 300,150 C400,20 500,100 600,120 C700,140 800,50 900,180 C950,240 1000,100 1000,100 L1000,300 L0,300 Z" fill="url(#gradient)" opacity="0.1" stroke="none"></path>
+<defs>
+<linearGradient id="gradient" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#c0c1ff" stop-opacity="1"></stop>
+<stop offset="100%" stop-color="#111317" stop-opacity="0"></stop>
+</linearGradient>
+</defs>
+</svg>
+<div class="relative z-20 flex justify-between items-end border-border-subtle h-full pb-2 text-text-secondary font-caption text-caption">
+<span class="">Dec 1</span>
+<span class="">Dec 15</span>
+<span class="">Dec 31</span>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-16 mb-20">
+<!-- Genre Focus -->
+<section class="md:col-span-7">
+<h2 class="font-label-md text-label-md text-text-secondary uppercase tracking-widest mb-10">Themes &amp; Genres</h2>
+<div class="space-y-8">
+<!-- Item 1 -->
+<div class="flex items-center gap-6">
+<div class="w-32 font-body-lg text-body-lg text-text-primary font-medium tracking-wide">Science Fiction</div>
+<div class="flex-1 h-px relative">
+<div class="absolute left-0 top-0 h-px bg-primary w-[45%]"></div>
+</div>
+<div class="w-12 text-right font-caption text-caption text-text-secondary">45%</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center gap-6">
+<div class="w-32 font-body-lg text-body-lg text-text-primary font-medium tracking-wide">History</div>
+<div class="flex-1 h-px relative">
+<div class="absolute left-0 top-0 h-px bg-surface-variant w-[25%]"></div>
+</div>
+<div class="w-12 text-right font-caption text-caption text-text-secondary">25%</div>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center gap-6">
+<div class="w-32 font-body-lg text-body-lg text-text-primary font-medium tracking-wide">Philosophy</div>
+<div class="flex-1 h-px relative">
+<div class="absolute left-0 top-0 h-px bg-surface-variant w-[15%]"></div>
+</div>
+<div class="w-12 text-right font-caption text-caption text-text-secondary">15%</div>
+</div>
+</div>
+</section>
+<!-- Milestones -->
+<section class="md:col-span-5">
+<h2 class="font-label-md text-label-md text-text-secondary uppercase tracking-widest mb-10">Milestones</h2>
+<div class="space-y-12">
+<!-- Milestone 1 -->
+<div>
+<div class="font-display-lg text-display-lg font-light text-primary mb-2 leading-none">50</div>
+<div class="font-headline-h3 text-headline-h3 text-text-primary mb-1">Books Read</div>
+<div class="font-caption text-caption text-text-secondary">Achieved on December 12</div>
+</div>
+<!-- Milestone 2 -->
+<div>
+<div class="font-display-lg text-display-lg font-light text-text-secondary mb-2 leading-none">14</div>
+<div class="font-headline-h3 text-headline-h3 text-text-primary mb-1">Day Streak</div>
+<div class="font-caption text-caption text-text-secondary">Consecutive days of reading</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Publication Timeline -->
+<section class="mb-12">
+<h2 class="font-label-md text-label-md text-text-secondary uppercase tracking-widest mb-12">Publication Eras</h2>
+<div class="flex justify-between items-end h-32 border-b border-border-subtle pb-6 px-4">
+<!-- Era 1 -->
+<div class="flex flex-col items-center gap-3">
+<div class="w-1 bg-surface-variant h-8 rounded-full relative overflow-hidden"><div class="absolute bottom-0 w-full bg-secondary-fixed-dim h-full"></div></div>
+<span class="font-caption text-caption text-text-secondary">1970s</span>
+</div>
+<!-- Era 2 -->
+<div class="flex flex-col items-center gap-3">
+<div class="w-1 bg-surface-variant h-12 rounded-full relative overflow-hidden"><div class="absolute bottom-0 w-full bg-primary h-full"></div></div>
+<span class="font-caption text-caption text-text-secondary">1980s</span>
+</div>
+<!-- Era 3 -->
+<div class="flex flex-col items-center gap-3">
+<div class="w-1 bg-surface-variant h-6 rounded-full relative overflow-hidden"><div class="absolute bottom-0 w-full bg-secondary-fixed-dim h-full"></div></div>
+<span class="font-caption text-caption text-text-secondary">1990s</span>
+</div>
+<!-- Era 4 -->
+<div class="flex flex-col items-center gap-3">
+<div class="w-1 bg-surface-variant h-20 rounded-full relative overflow-hidden"><div class="absolute bottom-0 w-full bg-surface-variant h-full"></div></div>
+<span class="font-caption text-caption text-text-secondary">2000s</span>
+</div>
+<!-- Era 5 -->
+<div class="flex flex-col items-center gap-3">
+<div class="w-1 bg-surface-variant h-16 rounded-full relative overflow-hidden"><div class="absolute bottom-0 w-full bg-primary h-full"></div></div>
+<span class="font-caption text-caption text-text-secondary">2010s</span>
+</div>
+<!-- Era 6 -->
+<div class="flex flex-col items-center gap-3">
+<div class="w-1 bg-surface-variant h-24 rounded-full relative overflow-hidden"><div class="absolute bottom-0 w-full bg-primary-container h-full"></div></div>
+<span class="font-caption text-caption text-text-secondary">2020s</span>
+</div>
+</div>
+</section>
+<div class="pb-12"></div> <!-- Spacer -->
+</div>
+</main>
+
+
+</body></html>

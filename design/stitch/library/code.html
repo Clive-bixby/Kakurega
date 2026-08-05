@@ -1,0 +1,358 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Lexicon - Library</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#111317",
+                        "on-surface": "#e2e2e8",
+                        "surface-container-high": "#282a2e",
+                        "surface-container": "#1e2024",
+                        "on-primary-fixed": "#07006c",
+                        "on-secondary-container": "#a7b6cc",
+                        "text-primary": "#F8FAFC",
+                        "primary-fixed": "#e1e0ff",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "tertiary-fixed": "#ffdcc5",
+                        "inverse-surface": "#e2e2e8",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "inverse-on-surface": "#2f3035",
+                        "primary-container": "#8083ff",
+                        "tertiary": "#ffb783",
+                        "surface-deep": "#16191F",
+                        "tertiary-container": "#d97721",
+                        "on-error": "#690005",
+                        "surface-container-lowest": "#0c0e12",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed": "#301400",
+                        "surface-tint": "#c0c1ff",
+                        "text-secondary": "#94A3B8",
+                        "secondary-fixed": "#d4e4fa",
+                        "on-error-container": "#ffdad6",
+                        "on-surface-variant": "#c7c4d7",
+                        "error-container": "#93000a",
+                        "on-background": "#e2e2e8",
+                        "on-secondary": "#233143",
+                        "border-subtle": "#2D333D",
+                        "secondary": "#b9c8de",
+                        "primary": "#c0c1ff",
+                        "surface-variant": "#333539",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "surface-muted": "#1E2229",
+                        "on-tertiary": "#4f2500",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "surface-bright": "#37393e",
+                        "on-tertiary-container": "#452000",
+                        "outline": "#908fa0",
+                        "secondary-container": "#39485a",
+                        "background": "#111317",
+                        "outline-variant": "#464554",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "on-primary": "#1000a9",
+                        "accent-purple-dim": "#312E81",
+                        "surface-dim": "#111317",
+                        "on-primary-container": "#0d0096",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "surface-container-low": "#1a1c20",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "surface-container-highest": "#333539",
+                        "inverse-primary": "#494bd6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "card-padding-lg": "32px",
+                        "sidebar-width": "260px",
+                        "page-padding-mobile": "24px",
+                        "unit": "8px",
+                        "page-padding-desktop": "40px",
+                        "card-padding-md": "24px",
+                        "content-max-width": "1200px"
+                    },
+                    "fontFamily": {
+                        "headline-h1": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-h2": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-h3": ["Inter"],
+                        "caption": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-h1": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-h2": ["24px", { "lineHeight": "32px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "headline-h3": ["20px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "caption": ["12px", { "lineHeight": "16px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-surface');
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Ambient shadows for book covers */
+        .book-shadow {
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 10px 20px -5px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Subtle transition for interactive elements */
+        .interactive-transition {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: theme('colors.surface-deep');
+        }
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.surface-variant');
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.surface-bright');
+        }
+    </style>
+</head>
+<body class="flex min-h-screen bg-background">
+<!-- SideNavBar (Shared Component) -->
+<nav class="fixed h-full left-0 z-40 bg-surface-deep py-6 docked h-screen w-sidebar-width top-0 flex flex-col border-border-subtle">
+<!-- Header -->
+<div class="px-6 mb-10">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center border border-border-subtle">
+<img alt="Lexicon App Logo" class="w-6 h-6 object-contain" data-alt="A minimalist app icon for Lexicon. A stylized, geometric book symbol constructed from elegant, thin white lines against a deep, dark gray background. The lines are precise and evoke a sense of architectural drafting. The aesthetic is clean, professional, and sophisticated, avoiding any cartoonish elements. The lighting is neutral, focusing entirely on the crispness of the vector-like shapes." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQbHNBPQhquwmOF4nrnLTIC1I_ZHFp70HQPDobvebSixrXufWTtfR71DuxQrjFPI__iTeglQG0n6ZHYMNNJ_SLHL2jIgALDpjh6NEfeDJeNaahd6kV55gn4Gm3hszBcVYmCaGPuep4uw-VXFEY4rbIW6FlVmbWTpba-5JD1hZxoGkrbdWzn4qjSygDO811UamTaNll1rd07DoOcXcCgyDmOjIc2pNPYPwQ3TlhhpYlW19QxA4Nr1_Eog">
+</div>
+<div>
+<h1 class="text-headline-h3 font-headline-h3 font-semibold text-on-surface">Lexicon</h1>
+<p class="font-label-md text-label-md text-text-secondary">Personal Library</p>
+</div>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<div class="flex-1 overflow-y-auto flex flex-col gap-2">
+<!-- Dashboard -->
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container rounded-lg opacity-70" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<!-- Library (Active) -->
+<a class="relative bg-surface-container-high/50 text-primary mx-2 px-4 py-3 flex items-center gap-3 transition-all duration-200 rounded-lg" href="#">
+<div class="absolute left-0 top-2 bottom-2 w-1 bg-primary rounded-full"></div>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_library</span>
+<span class="font-label-md text-label-md">Library</span>
+</a>
+<!-- Reading Now -->
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container rounded-lg opacity-70" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu_book</span>
+<span class="font-label-md text-label-md">Reading Now</span>
+</a>
+<!-- Wishlist -->
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container rounded-lg opacity-70" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">bookmark_add</span>
+<span class="font-label-md text-label-md">Wishlist</span>
+</a>
+<!-- Collections -->
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container rounded-lg opacity-70" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">auto_stories</span>
+<span class="font-label-md text-label-md">Collections</span>
+</a>
+<!-- Insights -->
+<a class="text-text-secondary hover:text-on-surface mx-2 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container rounded-lg opacity-70" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">insights</span>
+<span class="font-label-md text-label-md">Insights</span>
+</a>
+</div>
+<!-- CTA -->
+<div class="px-4 mt-6 mb-6">
+<button class="w-full bg-primary-container text-on-primary-container font-label-md text-label-md rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2 py-2.5">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                Add New Book
+            </button>
+</div>
+<!-- Footer Tabs -->
+<div class="flex flex-col gap-1 border-t border-border-subtle pt-4 px-2">
+<!-- Settings -->
+<a class="text-text-secondary hover:text-on-surface px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container rounded-lg" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+<!-- Support -->
+<a class="text-text-secondary hover:text-on-surface px-4 py-3 flex items-center gap-3 transition-colors hover:bg-surface-container dark:hover:bg-surface-container rounded-lg" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">help</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 ml-[260px] flex flex-col min-h-screen">
+<!-- TopNavBar (Shared Component) -->
+<header class="flex items-center justify-between w-full h-16 px-page-padding-desktop docked full-width top-0 sticky bg-surface/80 dark:bg-surface/80 backdrop-blur-md border-b border-border-subtle z-30">
+<!-- Command-style Search -->
+<div class="flex-1 max-w-2xl relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary">search</span>
+<input class="w-full bg-surface-container border border-border-subtle rounded-lg py-2 pl-10 pr-4 text-body-md font-body-md text-on-surface placeholder-text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Search title, author, or genre..." type="text">
+<div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+<kbd class="hidden sm:inline-block px-2 py-0.5 text-xs font-medium text-text-secondary bg-surface rounded border border-border-subtle">⌘</kbd>
+<kbd class="hidden sm:inline-block px-2 py-0.5 text-xs font-medium text-text-secondary bg-surface rounded border border-border-subtle">K</kbd>
+</div>
+</div>
+<!-- Trailing Icons & Profile -->
+<div class="flex items-center gap-4 ml-8">
+<button class="text-text-secondary hover:text-primary transition-colors w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-text-secondary hover:text-primary transition-colors w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined">history</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-border-subtle ml-2 cursor-pointer hover:opacity-80 transition-opacity">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A sleek, minimalist avatar placeholder. A soft gradient transitioning from deep charcoal gray to a slightly lighter, muted indigo tone. No distinct facial features, just a smooth, abstract representation of a profile meant to sit quietly in the top navigation bar of a premium dark-mode application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwUbMAIaGWx4bk8QIFmfaaiIsMooIGWwUSFqaipRsK8jP16p9s7WekK4TdMH9if0kiNs6iYGMBtxpz6K3Pt9Ux8BX04j_0jLoa5bi-Hm1rlMbTPZwnoShVlWgAH9UtFJD0Nh5kUX66VOJ-8P6DZe3GL0roKnMSrU27IB6sauPlJOwMPzaZ7r8F7PhBcAg2Dc_E8nLtpggF77h5KP-POSRda8D5PiJxo2qsqJ_eGQ48dYWsUWChFb_GYQ">
+</div>
+</div>
+</header>
+<!-- Library Content Canvas -->
+<div class="flex-1 p-page-padding-desktop overflow-y-auto flex flex-col">
+<!-- Left Side: Refine/Filters Sidebar -->
+<!-- Right Side: Book Grid Area -->
+<div class="flex-1 flex flex-col h-full">
+<!-- Toolbar -->
+<div class="flex items-center gap-3 mb-6">
+    <button class="px-5 py-2 rounded-full bg-primary text-on-primary font-medium text-label-md border border-primary/20 transition-all">All Books</button>
+    <button class="px-5 py-2 rounded-full bg-surface-container text-on-surface font-medium text-label-md border border-border-subtle hover:bg-surface-bright transition-all">Unread</button>
+    <button class="px-5 py-2 rounded-full bg-surface-container text-on-surface font-medium text-label-md border border-border-subtle hover:bg-surface-bright transition-all">Favorites</button>
+</div><div class="flex items-center justify-between mb-8 pb-4 shrink-0">
+<div class="flex items-baseline gap-4">
+<h1 class="text-headline-h1 font-headline-h1 text-on-surface font-semibold">Library</h1>
+<span class="text-xs font-medium text-text-secondary">142 items</span>
+<div class="group cursor-pointer flex flex-col">
+    <div class="relative aspect-[2/3] mb-4 rounded-lg border-2 border-dashed border-border-subtle flex flex-col items-center justify-center gap-3 hover:bg-surface-container hover:border-primary/50 transition-all duration-300 group-hover:shadow-lg">
+        <span class="material-symbols-outlined text-4xl text-text-secondary group-hover:text-primary transition-colors">add_circle</span>
+        <span class="text-label-md font-medium text-text-secondary group-hover:text-primary transition-colors">Add New Book</span>
+    </div>
+</div></div><button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container border border-border-subtle font-label-md text-on-surface hover:bg-surface-bright transition-colors ml-8 text-xs"><span class="material-symbols-outlined text-[20px]">filter_list</span>Filters</button>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 text-text-secondary">
+<span class="text-xs font-medium">Sort by:</span>
+<button class="flex items-center gap-1 hover:text-on-surface transition-colors px-2 py-1 rounded bg-surface-container border border-border-subtle">
+<span class="text-xs font-semibold">Recently Added</span>
+<span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+</div>
+
+<div class="flex items-center bg-surface-container rounded-lg border border-border-subtle p-0.5">
+<button class="p-1.5 rounded-md bg-surface-bright text-primary shadow-sm flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">grid_view</span>
+</button>
+<button class="p-1.5 rounded-md text-text-secondary hover:text-on-surface transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">view_list</span>
+</button>
+</div>
+<div class="group cursor-pointer flex flex-col">
+    <div class="relative aspect-[2/3] mb-4 rounded-lg border-2 border-dashed border-border-subtle flex flex-col items-center justify-center gap-3 hover:bg-surface-container hover:border-primary/50 transition-all duration-300 group-hover:shadow-lg">
+        <span class="material-symbols-outlined text-4xl text-text-secondary group-hover:text-primary transition-colors">add_circle</span>
+        <span class="text-label-md font-medium text-text-secondary group-hover:text-primary transition-colors">Add New Book</span>
+    </div>
+</div></div>
+</div>
+<!-- Grid -->
+<div class="flex-1 overflow-y-auto pb-12 pr-4 @container">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Book Item 1 -->
+<div class="group cursor-pointer flex flex-col">
+<div class="relative aspect-[2/3] mb-4 rounded-lg overflow-hidden book-shadow interactive-transition group-hover:-translate-y-1 group-hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)]">
+<img alt="Book Cover" class="w-full h-full object-cover" data-alt="A striking, minimalist book cover design for a science fiction novel. The background is a deep, textured matte black. In the center, a stark, glowing, iridescent geometric shape—perhaps a monolith or a stylized eye—radiates a subtle neon purple and blue aura. The typography is entirely absent from this rendering, focusing solely on the evocative, premium quality of the cover art itself. High resolution, stark contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBP7UOnGfljDtM030Cox33bvSw_xlAavs_zpcekkLHGTNXkgpNtPRIhfBCt4VblJEjaj27q5pUXaJPbBQk71ixQavrGYS_t7HxR9t8Eghk-IsyLPyEaxekyeS9Z9arNiKV7SMDLn5dutz0RQ19GIqkdQlt1evVcnJXf4JpA9Qc3_ek4axKFJKmY7lxcQHkpfkMJ-L-mrp9kvbWTi0Y09tAqWqlUzskQPJsrzmBycYUlwt6xKUSy6Tx3Qw">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+<button class="w-full py-2 bg-surface/80 backdrop-blur-sm text-on-surface text-label-md font-label-md rounded-md hover:bg-surface border border-white/10 transition-colors">View Details</button>
+</div>
+</div>
+<div class="flex flex-col gap-1 px-1">
+<h3 class="text-body-md font-body-md text-on-surface font-medium truncate group-hover:text-primary transition-colors font-semibold tracking-tight">The Dispossessed</h3>
+<p class="text-xs font-normal text-text-secondary truncate opacity-70">Ursula K. Le Guin</p>
+</div>
+</div>
+<!-- Book Item 2 -->
+<div class="group cursor-pointer flex flex-col">
+<div class="relative aspect-[2/3] mb-4 rounded-lg overflow-hidden book-shadow interactive-transition group-hover:-translate-y-1 group-hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)]">
+<img alt="Book Cover" class="w-full h-full object-cover" data-alt="A beautifully crafted book cover design for a book about design theory. The background is a crisp, cool, off-white. The central graphic features overlapping, precise grid lines in subtle greys, intersecting with a single bold, vibrant, abstract shape in a deep primary blue. The aesthetic is extremely structured, Bauhaus-inspired, clean, and intellectual. High fidelity texture showing the subtle grain of premium paper stock." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCN5M5q-R2300_qdP8LK2guE57JikuENj9ZY9mrxIi79d13MIzVLOdA25ZP3xSPKpT4j57RjRdNNWBFXGU-1k334q4E8e7ii8lP6Fb7fPYTI5_sGVMtg2zGgIZXO4IiuuwZriApmQNE6lJndFp0vx_XII5H-lSEamW9r7Rgfaj-G3dYetqWEFBdPznXvJxvAw-zM-oSOd4XKFaqsmueBmwcxGGXwZggT5YhageikNO3e7YrH8dIQ2v9RQ">
+</div>
+<div class="flex flex-col gap-1 px-1">
+<h3 class="text-body-md font-body-md text-on-surface font-medium truncate group-hover:text-primary transition-colors font-semibold tracking-tight">Grid Systems</h3>
+<p class="text-xs font-normal text-text-secondary truncate opacity-70">Ursula K. Le Guin</p>
+</div>
+</div>
+<!-- Book Item 3 -->
+<div class="group cursor-pointer flex flex-col">
+<div class="relative aspect-[2/3] mb-4 rounded-lg overflow-hidden book-shadow interactive-transition group-hover:-translate-y-1 group-hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)]">
+<img alt="Book Cover" class="w-full h-full object-cover" data-alt="An atmospheric, moody book cover design for a modern thriller. The scene depicts a rain-slicked, dark city street at night, illuminated only by the blurred, melancholic glow of a distant, indistinct neon sign reflecting in puddles. The color palette is dominated by deep blues, greys, and muted teal. The composition is cinematic and tense, with heavy vignetting and soft focus on the edges." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkA6umpkBNN-2qp4qC7UNKaL2Ydf9Kpy56VDVowFRm3O1C9nk7JkWKmvxmhzrmBumx013PCpRCmetZQlOpHgWMtIg4Y3V_nh787g0uWLr6SMO9PHmBpoLEhzCg6HCaYCryDA7C4Llg_IB7rBhD9w9D9WmlFzvcXF_cB8MTHBfn7-p0EwSXCLDIYTOieI4r3mCIYnt7nnpyfpBjBwqaBixC9uU0bkRbgbIkkn5x1Gv26S0oKImEayvo3Q">
+</div>
+<div class="flex flex-col gap-1 px-1">
+<h3 class="text-body-md font-body-md text-on-surface font-medium truncate group-hover:text-primary transition-colors font-semibold tracking-tight">Neuromancer</h3>
+<p class="text-xs font-normal text-text-secondary truncate opacity-70">Ursula K. Le Guin</p>
+</div>
+</div>
+<!-- Book Item 4 (Reading State Example) -->
+<div class="group cursor-pointer flex flex-col">
+<div class="relative aspect-[2/3] mb-4 rounded-lg overflow-hidden book-shadow interactive-transition group-hover:-translate-y-1 group-hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)]">
+<img alt="Book Cover" class="w-full h-full object-cover" data-alt="A serene, minimalist book cover for a philosophical text. A vast, calm ocean stretching to a perfectly horizontal horizon line, meeting a soft, pale, overcast sky. A single, small, perfectly smooth, dark grey stone rests in the shallow water in the extreme foreground, off-center. The color palette is muted, consisting of soft greys, pale blues, and tranquil whites. High resolution, peaceful, contemplative mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvCW4U9ajIi6mRSXujslXQWxy4-XkIP_3b81JosCH-P0x1TKM3cD2S4mLFemVjIGaZGSeQGhgul5ACePIR2DkmmVkmvGELc_9Cs6ikhs516vhGZwmwzk3rDkJPTC8i5chFI9yPm1UR3CHp7Kevgc10zFKu-yk2OO0OjYwUjhKI8a1E-RbZE1ibCD3Yqy1MeQKLXeaEkpWQnUAmeSUnRSYOls8wjn6uJ1DwA6DTQsRGx_FGNB-RXNP2kw">
+<!-- Progress Indicator overlay -->
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-surface-container/80 backdrop-blur-sm">
+<div class="h-full bg-primary w-[45%]"></div>
+</div>
+<div class="absolute top-2 right-2 bg-surface/90 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-primary border border-white/10 uppercase tracking-wider">
+                                    Reading
+                                </div>
+</div>
+<div class="flex flex-col gap-1 px-1">
+<h3 class="text-body-md font-body-md text-on-surface font-medium truncate group-hover:text-primary transition-colors font-semibold tracking-tight">Meditations</h3>
+<p class="text-xs font-normal text-text-secondary truncate opacity-70">Ursula K. Le Guin</p>
+</div>
+</div>
+<!-- Book Item 5 -->
+<div class="group cursor-pointer flex flex-col">
+<div class="relative aspect-[2/3] mb-4 rounded-lg overflow-hidden book-shadow interactive-transition group-hover:-translate-y-1 group-hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)] bg-surface-container flex items-center justify-center border border-border-subtle">
+<span class="material-symbols-outlined text-4xl text-text-secondary" style="font-variation-settings: 'wght' 200;">image_not_supported</span>
+</div>
+<div class="flex flex-col gap-1 px-1">
+<h3 class="text-body-md font-body-md text-on-surface font-medium truncate group-hover:text-primary transition-colors font-semibold tracking-tight">Unknown Title</h3>
+<p class="text-xs font-normal text-text-secondary truncate opacity-70">Ursula K. Le Guin</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+
+
+
+
+
+</body></html>
