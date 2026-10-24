@@ -6,6 +6,7 @@ import {
   PlusCircle,
   Search,
   Settings,
+  Upload,
 } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 
@@ -13,6 +14,7 @@ const navigationItems = [
   { label: "Dashboard", path: "/dashboard", icon: Home },
   { label: "Library", path: "/library", icon: Library },
   { label: "Add Book", path: "/add-book", icon: PlusCircle },
+  { label: "Import", path: "/import", icon: Upload },
   { label: "Search", path: "/search", icon: Search },
   { label: "Insights", path: "/insights", icon: BarChart3 },
   { label: "Settings", path: "/settings", icon: Settings },

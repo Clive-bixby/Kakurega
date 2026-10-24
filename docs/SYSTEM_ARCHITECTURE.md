@@ -182,7 +182,19 @@ Barcode Detection
 
 ------------------------------------------------------------------------
 
-## 8. External Services
+## 8. Import Pipeline
+
+`POST /import/csv` accepts a CSV upload, parses it with `app/core/csv_import.py`
+(pure header/row parsing), then persists it through `ImportService`. Each row
+runs in its own savepoint so a bad row cannot abort the file. The importer only
+uses values in the CSV — it never calls Open Library or Google Books — and
+creates missing authors, publishers, genres, and tags by name. Duplicates are
+matched by ISBN (or by title + author when no ISBN is usable); with
+`update_existing=true` only blank fields are filled.
+
+------------------------------------------------------------------------
+
+## 9. External Services
 
 ### Open Library
 
@@ -202,7 +214,7 @@ Uses zxing-cpp with Pillow for local image decoding.
 
 ------------------------------------------------------------------------
 
-## 9. Search
+## 10. Search
 
 Current: - Case-insensitive `ILIKE` matching in `GET /books?q=...`
 
@@ -216,7 +228,7 @@ Future: - Vector embeddings - Semantic search
 
 ------------------------------------------------------------------------
 
-## 10. Recommendations
+## 11. Recommendations
 
 ### Version 1
 
@@ -231,7 +243,7 @@ Future: - Vector embeddings - Semantic search
 
 ------------------------------------------------------------------------
 
-## 11. Analytics
+## 12. Analytics
 
 Generated entirely from local database data.
 
@@ -240,7 +252,7 @@ timeline - Books added
 
 ------------------------------------------------------------------------
 
-## 12. Deployment
+## 13. Deployment
 
 Development:
 
@@ -268,7 +280,7 @@ Object Storage
 
 ------------------------------------------------------------------------
 
-## 13. Security
+## 14. Security
 
 Current: - No authentication
 
@@ -277,7 +289,7 @@ variables for secrets
 
 ------------------------------------------------------------------------
 
-## 14. Design Principles
+## 15. Design Principles
 
 -   Backend is the single source of truth.
 -   Frontend never calls external metadata APIs directly.
@@ -288,7 +300,7 @@ variables for secrets
 
 ------------------------------------------------------------------------
 
-## 15. Future Evolution
+## 16. Future Evolution
 
 -   Family accounts
 -   Mobile application

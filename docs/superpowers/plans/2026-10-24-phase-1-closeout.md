@@ -24,7 +24,7 @@ React + TypeScript + Vite.
 | Phase | Scope | Status |
 |---|---|---|
 | 1 | Foundation and correctness | **Complete** |
-| 2 | Bulk import | Not started |
+| 2 | Bulk import | **Complete** |
 | 3 | Catalog workflow | Not started |
 | 4 | Reading tracking | Not started |
 | 5 | Tags, notes, filters, dashboard | Not started |
@@ -191,9 +191,168 @@ green.
 
 ---
 
-## Phase 2 — Bulk import (plan written when phase starts)
+## Phase 2 — Bulk import
 
-Source: spec §8.6 and §11 Phase 2.
+**Goal:** a Goodreads CSV export (or the app's own column names) can be
+imported in one upload, with per-row outcomes, duplicate handling, and no
+external API calls. The library shows the imported books paginated.
+
+**Design:**
+
+- Parsing is pure and lives in `backend/app/core/csv_import.py`: decode bytes,
+  normalize headers, return `ParsedRow` objects plus the list of ignored
+  columns. No database, no network.
+- Persistence lives in `backend/app/services/importer.py`, using
+  `CatalogRepository` (case-insensitive get-or-create for authors, publishers,
+  genres, tags) and non-committing `BookRepository` calls. Each CSV row runs in
+  its own savepoint; the whole file commits once at the end.
+- Header aliases (case/space-insensitive, BOM stripped):
+
+  | Field | Headers |
+  |---|---|
+  | title | `title` |
+  | authors | `author`, `authors`, `author(s)` |
+  | isbn10 | `isbn`, `isbn10` |
+  | isbn13 | `isbn13` |
+  | pages | `pages`, `number of pages`, `page count` |
+  | publisher | `publisher` |
+  | published_year | `published_year`, `published year`, `year published`, `year`, `publication year` |
+  | tags | `tags`, `bookshelves` |
+  | genres | `genre`, `genres` |
+  | notes | `notes`, `my review`, `review` |
+
+- Goodreads `ISBN` cells wrapped as `="0140328726"` are unwrapped. Goodreads
+  default shelves `read`, `currently-reading`, `to-read` are dropped from tags.
+- Tags and genres split on comma/semicolon, trimmed, deduped case-insensitively.
+  Authors split on `;` only (Goodreads writes `Last, First`).
+- Unknown headers and the deliberately ignored `My Rating`, `Exclusive Shelf`,
+  `Date Read` go into `ignored_columns` (capped at 50) so nothing is dropped
+  silently.
+- Row numbers are 1-based file rows (header is row 1). Blank lines are skipped
+  without an outcome.
+- Invalid/mismatched ISBN: import the row without an ISBN, add a warning. If one
+  half of a mismatched pair is valid, use that half and warn.
+- Empty title → `failed`. The field is capped at 500 chars with a warning.
+- Invalid pages/year (non-numeric, out of 1–100,000 / 1000–next-year) become
+  `null` with a warning.
+- Duplicate ISBN (either form):
+  - `update_existing=false` → `skipped_duplicates += 1`.
+  - `update_existing=true` → fill only blank fields/relationships on the
+    existing book, never overwrite, count in `updated`.
+- Rows with no usable ISBN fall back to a case-insensitive title + author match,
+  so re-importing a file containing malformed ISBNs stays idempotent.
+- `failed`/`warnings` capped at 100 entries each.
+- Upload limit 10 MB, read with `read_limited`; 413 when exceeded.
+
+**API:** `POST /import/csv?update_existing=false`, multipart field `file`.
+Response schema `ImportResult`:
+
+```json
+{
+  "created": 0, "updated": 0, "skipped_duplicates": 0,
+  "failed": [{"row": 2, "reason": "Missing title"}],
+  "warnings": [{"row": 3, "reason": "Invalid ISBN; imported without ISBN"}],
+  "ignored_columns": ["My Rating", "Exclusive Shelf", "Date Read"]
+}
+```
+
+### Task 1: Tag relationship and non-committing repository writes
+
+**Files:** `backend/app/models/book.py`, `backend/app/repositories/book.py`,
+`backend/app/repositories/catalog.py` (new)
+
+- Add `Book.tags` (`secondary=book_tags`, cascade-safe read/write).
+- `BookRepository.create(data, commit=True)` and
+  `BookRepository.update(book, data, commit=True)` so import can batch commits.
+- `BookRepository.fill_blanks(book, values)` fills only `None`/empty fields and
+  only empty relationship collections. Returns whether anything changed.
+- `CatalogRepository.get_or_create_author/publisher/genre/tag(name)` with an
+  in-request lowercase cache; flushes but never commits.
+
+### Task 2: Pure CSV parsing
+
+**Files:** `backend/app/core/csv_import.py` (new),
+`backend/tests/test_import_parser.py` (new)
+
+- `parse_csv(data: bytes) -> ParsedCsv` with `rows`, `ignored_columns`.
+- `ParsedRow` dataclass: `row_number`, `title`, `authors`, `isbn10`, `isbn13`,
+  `pages`, `publisher`, `published_year`, `tags`, `genres`, `notes`, `warnings`.
+- Decode `utf-8-sig`, then `utf-8`, then `cp1252`.
+- Tests: aliases, BOM, `="..."` ISBN unwrap, semicolon/comma splitting, default
+  shelf drop, dedupe, ignored columns, row numbering, bad pages/year warnings,
+  missing title header → `ValueError`, blank line skipped.
+
+### Task 3: Import service and schemas
+
+**Files:** `backend/app/services/importer.py` (new),
+`backend/app/schemas/importing.py` (new),
+`backend/tests/test_import.py` (new)
+
+- `ImportService(db).import_csv(data: bytes, update_existing: bool) -> ImportResult`.
+- Per row: `db.begin_nested()`; resolve ISBNs via `canonicalize_isbns`; look up
+  duplicates; create or fill blanks; count; catch any exception as `failed`
+  without aborting the file; commit once at the end.
+- Tests: creates books/relationships/notes/tags; default shelves absent; re-import
+  creates zero rows; `update_existing` fills blanks without overwriting;
+  bad ISBN imports with warning; missing title fails one row only; ignored
+  columns reported.
+
+### Task 4: Route
+
+**Files:** `backend/app/api/v1/routes/importing.py` (new),
+`backend/app/api/v1/router.py`
+
+- `POST /import/csv`, `UploadFile = File(...)`, `update_existing: bool = False`.
+- 400 for a file without a title column, 413 past 10 MB, 400 for unreadable CSV.
+- Tests in `test_import.py` for 413, missing title header, and response shape.
+
+### Task 5: 500-row fixture test (phase exit)
+
+**Files:** `backend/tests/test_import.py`
+
+- Generate 500 Goodreads-style rows: 490 valid unique ISBN-13s, 5 repeats of
+  earlier ISBNs, 3 invalid checksums, 2 missing titles.
+- Expected: `created == 493`, `skipped_duplicates == 5`, `failed == 2`,
+  `warnings == 3`; `GET /books?limit=50` reports `total == 493` and returns 50
+  items in a constant number of queries.
+- Re-import with `update_existing=false` → `created == 0`,
+  `skipped_duplicates == 498` (495 ISBN matches + 3 no-ISBN title matches);
+  `total` stays 493.
+
+### Task 6: Import UI
+
+**Files:** `frontend/src/pages/ImportPage.tsx` (new),
+`frontend/src/services/api.ts`, `frontend/src/App.tsx`,
+`frontend/src/layouts/AppLayout.tsx`
+
+- File input (`accept=".csv,text/csv"`), `update_existing` checkbox, submit, and
+  a result panel with created/updated/skipped counts plus failed/warnings lists.
+- Link to `/library` after a successful import.
+- Nav entry "Import" with the `Upload` icon.
+
+### Task 7: Documentation and gate
+
+**Files:** `docs/API.md`, `docs/SYSTEM_ARCHITECTURE.md`,
+`docs/superpowers/plans/2026-10-24-phase-1-closeout.md`, `.ai/state.md`
+
+- Document the endpoint, headers, counts, warnings, and ignored columns.
+- Tick the phase gate and mark the status row `Complete`.
+- No migration is added in this phase.
+
+**Exit criteria:** the 500-row fixture yields exactly `created 493,
+skipped_duplicates 5, failed 2, warnings 3`; re-import creates nothing; a
+malformed ISBN survives as a warning; imported books appear paginated in the
+library; suite and build green.
+
+**Gate:**
+
+- [x] `cd backend && python -m pytest -q` — 77 passed
+- [x] `cd frontend && npm run build` — green
+- [x] No new migration in this phase
+- [x] Docs updated (`API.md`, `SYSTEM_ARCHITECTURE.md`)
+- [x] Status table and `.ai/state.md` updated; phase committed
+
+---
 
 ## Phase 3 — Catalog workflow (plan written when phase starts)
 

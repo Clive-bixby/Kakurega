@@ -4,7 +4,8 @@ from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, Text, func,
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
-from app.models.associations import book_authors, book_genres
+from app.models.associations import book_authors, book_genres, book_tags
+from app.models.tag import Tag
 
 
 class Book(Base):
@@ -50,6 +51,7 @@ class Book(Base):
     publisher: Mapped["Publisher | None"] = relationship("Publisher")
     authors: Mapped[list["Author"]] = relationship("Author", secondary=book_authors)
     genres: Mapped[list["Genre"]] = relationship("Genre", secondary=book_genres)
+    tags: Mapped[list[Tag]] = relationship("Tag", secondary=book_tags)
 
     @property
     def author_ids(self) -> list[int]:

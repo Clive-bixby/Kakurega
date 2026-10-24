@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 from sqlalchemy import distinct, func, or_, select
@@ -10,6 +12,7 @@ from app.models.author import Author
 from app.models.book import Book
 from app.models.genre import Genre
 from app.models.publisher import Publisher
+from app.models.tag import Tag
 from app.schemas.book import BookCreate, BookUpdate
 
 
@@ -125,6 +128,17 @@ class BookRepository:
             statement = statement.where(Book.id != exclude_id)
         return self.db.execute(statement).scalars().first()
 
+    def find_by_title_and_authors(
+        self, title: str, authors: list[str]
+    ) -> Book | None:
+        """Fallback identity for rows that carry no usable ISBN."""
+        statement = select(Book).where(func.lower(Book.title) == title.lower())
+        if authors:
+            statement = statement.join(Book.authors).where(
+                func.lower(Author.name).in_([name.lower() for name in authors])
+            )
+        return self.db.execute(statement).scalars().first()
+
     def _validate_ids(self, publisher_id, author_ids, genre_ids):
         if publisher_id is not None and self.db.get(Publisher, publisher_id) is None:
             raise InvalidReferenceError("Publisher not found")
@@ -140,7 +154,7 @@ class BookRepository:
         if existing is not None:
             raise DuplicateBookError(existing.id)
 
-    def create(self, data: BookCreate) -> Book:
+    def create(self, data: BookCreate, commit: bool = True) -> Book:
         self._validate_ids(data.publisher_id, data.author_ids, data.genre_ids)
         self._ensure_unique_isbn(data.isbn10, data.isbn13)
 
@@ -155,6 +169,9 @@ class BookRepository:
                 self.db.query(Genre).filter(Genre.id.in_(data.genre_ids)).all()
             )
         self.db.add(book)
+        if not commit:
+            self.db.flush()
+            return book
         try:
             self.db.commit()
         except IntegrityError as exc:
@@ -164,7 +181,7 @@ class BookRepository:
         self.db.refresh(book)
         return book
 
-    def update(self, book: Book, data: BookUpdate) -> Book:
+    def update(self, book: Book, data: BookUpdate, commit: bool = True) -> Book:
         values = data.model_dump(exclude_unset=True)
         author_ids = values.pop("author_ids", None)
         genre_ids = values.pop("genre_ids", None)
@@ -199,6 +216,9 @@ class BookRepository:
                 if genre_ids
                 else []
             )
+        if not commit:
+            self.db.flush()
+            return book
         try:
             self.db.commit()
         except IntegrityError as exc:
@@ -206,6 +226,37 @@ class BookRepository:
             raise InvalidReferenceError("Invalid book data") from exc
         self.db.refresh(book)
         return book
+
+    def fill_blanks(
+        self,
+        book: Book,
+        values: dict,
+        *,
+        authors: list[Author] | None = None,
+        genres: list[Genre] | None = None,
+        tags: list[Tag] | None = None,
+    ) -> bool:
+        """Fill only empty scalar fields and empty relationship collections."""
+        changed = False
+        for key, value in values.items():
+            if value is None or value == "":
+                continue
+            current = getattr(book, key)
+            if current is None or current == "":
+                setattr(book, key, value)
+                changed = True
+
+        for target, incoming in (
+            ("authors", authors),
+            ("genres", genres),
+            ("tags", tags),
+        ):
+            if incoming and not getattr(book, target):
+                setattr(book, target, incoming)
+                changed = True
+
+        self.db.flush()
+        return changed
 
     def delete(self, book: Book) -> None:
         self.db.delete(book)

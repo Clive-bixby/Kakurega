@@ -304,21 +304,63 @@ Returns dashboard statistics:
 
 # 11. Import / Export
 
-Planned for the next phase — not implemented yet.
+## POST /import/csv
 
-## POST /import
+Multipart upload with field `file` (CSV, header row required, ≤ 10 MB) and
+optional query parameter `update_existing` (default `false`).
 
-Supported:
+Recognized headers (case-insensitive; Goodreads names and Kakurega names both
+work):
 
--   CSV
--   JSON
+| Field | Headers |
+|---|---|
+| title | `Title` |
+| authors | `Author`, `Authors`, `Author(s)` |
+| isbn10 | `ISBN`, `ISBN10` |
+| isbn13 | `ISBN13` |
+| pages | `Pages`, `Number of Pages`, `Page Count` |
+| publisher | `Publisher` |
+| published_year | `Published_Year`, `Published Year`, `Year Published`, `Year`, `Publication Year` |
+| tags | `Tags`, `Bookshelves` |
+| genres | `Genre`, `Genres` |
+| notes | `Notes`, `My Review`, `Review` |
+
+Behaviour:
+
+- Import never calls Open Library or Google Books; only the CSV values are used.
+- Missing authors, publishers, genres, and tags are created case-insensitively.
+- `Bookshelves` becomes tags; the Goodreads default shelves `read`,
+  `currently-reading`, and `to-read` are dropped.
+- `My Rating`, `Exclusive Shelf`, `Date Read`, and any unknown headers are
+  reported in `ignored_columns` (capped at 50) instead of being silently lost.
+- Each row is processed independently: one bad row never aborts the file.
+- A malformed ISBN imports the book without an ISBN and adds a warning. A row
+  without a title is reported in `failed`.
+- Duplicate ISBNs (either form) are skipped, or with `update_existing=true`
+  fill only blank fields on the existing book without overwriting anything.
+  Rows without a usable ISBN fall back to a case-insensitive title + author
+  match, so importing the same file twice is idempotent.
+- `failed` and `warnings` are capped at 100 entries each.
+- Row numbers are 1-based file rows; the header is row 1.
+
+Response:
+
+```json
+{
+  "created": 493,
+  "updated": 0,
+  "skipped_duplicates": 5,
+  "failed": [{"row": 500, "reason": "Missing title"}],
+  "warnings": [{"row": 497, "reason": "Invalid ISBN; imported without ISBN"}],
+  "ignored_columns": ["My Rating", "Exclusive Shelf", "Date Read"]
+}
+```
+
+Returns 400 when the CSV is empty or has no title column, and 413 above 10 MB.
 
 ## GET /export
 
-Supported:
-
--   CSV
--   JSON
+Not implemented yet. Planned for CSV and JSON.
 
 ------------------------------------------------------------------------
 

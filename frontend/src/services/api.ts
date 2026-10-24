@@ -110,3 +110,41 @@ export async function createBook(data: BookInput): Promise<Book> {
   if (!res.ok) throw new Error("Failed to create book");
   return res.json();
 }
+
+export type ImportProblem = {
+  row: number;
+  reason: string;
+};
+
+export type ImportResult = {
+  created: number;
+  updated: number;
+  skipped_duplicates: number;
+  failed: ImportProblem[];
+  warnings: ImportProblem[];
+  ignored_columns: string[];
+};
+
+export async function importCsv(
+  file: File,
+  updateExisting = false,
+): Promise<ImportResult> {
+  const form = new FormData();
+  form.append("file", file);
+  const query = updateExisting ? "?update_existing=true" : "";
+  const res = await fetch(`/api/v1/import/csv${query}`, {
+    method: "POST",
+    body: form,
+  });
+  if (!res.ok) {
+    let message = "Failed to import";
+    try {
+      const data = await res.json();
+      if (typeof data.detail === "string") message = data.detail;
+    } catch {
+      // Keep the generic message when the body is not JSON.
+    }
+    throw new Error(message);
+  }
+  return res.json();
+}
