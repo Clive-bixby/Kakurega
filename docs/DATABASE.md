@@ -103,6 +103,10 @@ Represents a physical copy owned.
 -   id
 -   name (unique case-insensitively)
 
+`GET /tags` derives `book_count` from `book_tags`, so no counter column can
+drift. Renaming a tag updates every book at once; deleting a tag removes its
+`book_tags` rows and leaves the books intact.
+
 ### BookTag
 
 -   book_id (FK, cascades)

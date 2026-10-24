@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { ProgressBar } from "../components/ProgressBar";
 import { EmptyState } from "../shared/EmptyState";
 import { PageHeader } from "../shared/PageHeader";
+import { formatDate } from "../shared/format";
 import { Insights, fetchInsights } from "../services/api";
 
 export function DashboardPage() {
@@ -25,12 +26,35 @@ export function DashboardPage() {
       {error && <p role="alert">{error}</p>}
       {insights && (
         <>
+          <div className="stat-grid">
+            <div className="stat-card">
+              <span className="stat-label">Books</span>
+              <span className="stat-value tabular">{insights.total_books}</span>
+              <Link to="/library" className="text-link">
+                Browse library
+              </Link>
+            </div>
+            <div className="stat-card">
+              <span className="stat-label">Household members</span>
+              <span className="stat-value tabular">{insights.total_members}</span>
+              <Link to="/reading" className="text-link">
+                Reading activity
+              </Link>
+            </div>
+            <div className="stat-card">
+              <span className="stat-label">In progress</span>
+              <span className="stat-value tabular">
+                {insights.currently_reading.length}
+              </span>
+              <Link to="/reading" className="text-link">
+                Who is reading what
+              </Link>
+            </div>
+          </div>
+
           <section className="panel" aria-labelledby="currently-reading-heading">
             <div className="panel-header">
               <h2 id="currently-reading-heading">Currently reading</h2>
-              <span className="muted tabular">
-                {insights.currently_reading.length}
-              </span>
             </div>
 
             {insights.currently_reading.length === 0 ? (
@@ -64,23 +88,47 @@ export function DashboardPage() {
             )}
           </section>
 
-          <section className="panel" aria-labelledby="collection-heading">
+          <section className="panel" aria-labelledby="recently-added-heading">
             <div className="panel-header">
-              <h2 id="collection-heading">Collection</h2>
+              <h2 id="recently-added-heading">Recently added</h2>
+              <Link to="/library" className="text-link">
+                View all
+              </Link>
             </div>
-            <p>
-              Total books: <span className="tabular">{insights.total_books}</span>
-            </p>
-            <ul>
-              {Object.entries(insights.by_published_year).map(
-                ([year, count]) => (
-                  <li key={year}>
-                    <span className="tabular">{year}</span>:{" "}
-                    <span className="tabular">{count}</span>
+
+            {insights.recently_added.length === 0 ? (
+              <EmptyState title="No books yet">
+                Add a book by ISBN or <Link to="/import">import a shelf</Link>.
+              </EmptyState>
+            ) : (
+              <ul className="recent-list">
+                {insights.recently_added.map((book) => (
+                  <li key={book.book_id} className="recent-item">
+                    {book.cover_url ? (
+                      <img
+                        className="recent-cover"
+                        src={book.cover_url}
+                        alt=""
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="recent-cover recent-cover-empty" aria-hidden="true" />
+                    )}
+                    <div>
+                      <Link
+                        to={`/library/${book.book_id}`}
+                        className="book-list-title"
+                      >
+                        {book.title}
+                      </Link>
+                      <p className="book-list-meta">
+                        Added {formatDate(book.created_at)}
+                      </p>
+                    </div>
                   </li>
-                ),
-              )}
-            </ul>
+                ))}
+              </ul>
+            )}
           </section>
         </>
       )}

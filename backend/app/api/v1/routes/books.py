@@ -18,6 +18,7 @@ router = APIRouter()
 def list_books(
     q: str = Query(default=""),
     genre_id: int | None = None,
+    tag: str = Query(default=""),
     year_from: int | None = Query(default=None, ge=1000),
     year_to: int | None = Query(default=None, ge=1000),
     member_id: int | None = None,
@@ -30,6 +31,7 @@ def list_books(
     filters = BookFilters(
         q=q.strip() or None,
         genre_id=genre_id,
+        tag=tag.strip() or None,
         year_from=year_from,
         year_to=year_to,
         member_id=member_id,

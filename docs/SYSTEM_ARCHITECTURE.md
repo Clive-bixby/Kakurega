@@ -142,7 +142,7 @@ frontend/
 └── utils/
 ```
 
-Main pages: Dashboard, Library, Book Details, Reading, Add Book, Import,
+Main pages: Dashboard, Library, Tags, Book Details, Reading, Add Book, Import,
 Search, Insights, Settings
 
 ------------------------------------------------------------------------
@@ -266,6 +266,32 @@ Dashboard    ──► GET /insights → currently_reading
 
 ---
 
+## 8.2 Tags, Filters, and Insights
+
+Tags are household-wide labels. `GET /tags` returns each tag with a derived
+`book_count`; `PATCH /tags/{id}` renames one everywhere and `DELETE /tags/{id}`
+removes its `book_tags` rows without deleting books.
+
+The Library filter bar composes one `GET /books` request from text (debounced),
+genre, tag name, publication-year range, member, reading status, and sort. The
+tag filter joins `book_tags` and matches the tag name case-insensitively, so the
+list-item shape stays lean; the UI resolves `tag_ids` to names from the tag list
+it already loads.
+
+`GET /insights` powers both the Dashboard and the Insights page with grouped SQL
+(no full-table scans in Python):
+
+``` text
+Dashboard ──► totals, currently_reading, recently_added
+Insights  ──► by_published_year, by_genre (top 10),
+              by_author (top 10), by_language
+```
+
+Tags and notes are edited through the existing `BookForm` (household note) and
+`ReadingPanel` (per-member note); no separate note storage exists.
+
+---
+
 ## 9. External Services
 
 ### Open Library
@@ -292,9 +318,9 @@ Current: - Case-insensitive `ILIKE` matching in `GET /books?q=...`
 
 Fields: - Title - Subtitle - ISBN - Description - Author - Publisher
 
-`Genres` and `Notes` are not searched yet; genre is a filter
-(`?genre_id=`). `%`, `_`, and `\` are treated literally. Paginated 50 rows at a
-time by default.
+`Genres` and `Notes` are not searched yet; genre and tag are filters
+(`?genre_id=`, `?tag=`). `%`, `_`, and `\` are treated literally. Paginated 50
+rows at a time by default.
 
 Future: - Vector embeddings - Semantic search
 

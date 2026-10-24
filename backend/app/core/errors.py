@@ -19,3 +19,8 @@ class DuplicateMemberError(DomainError):
 
 class InvalidReadingError(DomainError):
     pass
+
+
+class DuplicateTagError(DomainError):
+    def __init__(self):
+        super().__init__("A tag with this name already exists")

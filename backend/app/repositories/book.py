@@ -21,6 +21,7 @@ from app.schemas.book import BookCreate, BookUpdate
 class BookFilters:
     q: str | None = None
     genre_id: int | None = None
+    tag: str | None = None
     year_from: int | None = None
     year_to: int | None = None
     member_id: int | None = None
@@ -85,6 +86,14 @@ class BookRepository:
             statement = statement.join(Book.genres).where(Genre.id == filters.genre_id)
             count_statement = count_statement.join(Book.genres).where(
                 Genre.id == filters.genre_id
+            )
+
+        if filters.tag:
+            statement = statement.join(Book.tags).where(
+                func.lower(Tag.name) == filters.tag.lower()
+            )
+            count_statement = count_statement.join(Book.tags).where(
+                func.lower(Tag.name) == filters.tag.lower()
             )
 
         entry_conditions = []

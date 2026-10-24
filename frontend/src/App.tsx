@@ -9,6 +9,7 @@ import { LibraryPage } from "./pages/LibraryPage";
 import { ReadingPage } from "./pages/ReadingPage";
 import { SearchPage } from "./pages/SearchPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { TagsPage } from "./pages/TagsPage";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="library" element={<LibraryPage />} />
         <Route path="library/:id" element={<BookDetailsPage />} />
+        <Route path="tags" element={<TagsPage />} />
         <Route path="reading" element={<ReadingPage />} />
         <Route path="add-book" element={<AddBookPage />} />
         <Route path="import" element={<ImportPage />} />

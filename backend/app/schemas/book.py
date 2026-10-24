@@ -24,7 +24,7 @@ class BookCreate(BaseModel):
     genre_ids: list[int] = Field(default_factory=list)
     tag_ids: list[int] = Field(default_factory=list)
 
-    @field_validator("title", "subtitle", "language", mode="before")
+    @field_validator("title", "subtitle", "language", "notes", mode="before")
     @classmethod
     def _strip_text(cls, value):
         return value.strip() if isinstance(value, str) else value
@@ -65,7 +65,7 @@ class BookUpdate(BaseModel):
     genre_ids: list[int] | None = None
     tag_ids: list[int] | None = None
 
-    @field_validator("title", "subtitle", "language", mode="before")
+    @field_validator("title", "subtitle", "language", "notes", mode="before")
     @classmethod
     def _strip_text(cls, value):
         return value.strip() if isinstance(value, str) else value

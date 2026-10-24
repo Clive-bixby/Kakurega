@@ -51,6 +51,7 @@ Query parameters:
 |---|---|---|---|
 | `q` | string | | Free text over title, subtitle, ISBNs, description, author and publisher names. `%`, `_`, and `\` are literal. A valid ISBN matches either ISBN form, with or without hyphens. |
 | `genre_id` | int | | Only books in this genre |
+| `tag` | string | | Only books carrying this tag (exact name, case-insensitive) |
 | `year_from` / `year_to` | int | | Inclusive publication-year range |
 | `member_id` | int | | Only books this household member has any reading entry for |
 | `status` | `want_to_read` \| `reading` \| `finished` \| `abandoned` | | Only books with a reading entry in this status (any member unless `member_id` is also set) |
@@ -323,8 +324,29 @@ Publishers additionally accept an optional `country`. Names are required, are
 trimmed, and cannot be blank (422). Returns the existing or newly created
 entity with 200.
 
-Tag management (rename/delete) is planned for the dashboard phase; the list and
-create endpoints above already support the book editor.
+## Tags
+
+`GET /tags` returns each tag with the number of books carrying it, ordered by
+name:
+
+```json
+[{"id": 1, "name": "Fantasy", "book_count": 12}]
+```
+
+`POST /tags` returns the same shape (creating the tag when needed); posting an
+existing name returns the existing tag. `q` and `limit` behave as above.
+
+### PATCH /tags/{id}
+
+Renames a tag. Request body: `{"name": "Epic Fantasy"}`. Names are trimmed,
+1–100 characters, and unique case-insensitively (422 when blank, 409 when
+another tag already uses the name, 404 when the id does not exist). Returns the
+updated tag with its `book_count`; every book using it sees the new name.
+
+### DELETE /tags/{id}
+
+Deletes a tag and removes it from every book. Returns 204, or 404 when the tag
+does not exist. Books are not deleted.
 
 ------------------------------------------------------------------------
 
@@ -334,14 +356,23 @@ create endpoints above already support the book editor.
 
 Returns dashboard statistics:
 
-- `total_books`
-- `by_published_year`
-- `currently_reading` — one item per entry whose status is `reading`:
+- `total_books` and `total_members`
+- `by_published_year` — map of year to book count
+- `by_genre` — top 10 genres as `{id, name, count}`, highest count first
+- `by_author` — top 10 authors as `{id, name, count}`, highest count first
+- `by_language` — map of language to book count
+- `currently_reading` — one item per entry whose status is `reading`, ordered
+  by member name then book title
+- `recently_added` — the 5 newest books, newest first
 
 ```json
 {
   "total_books": 42,
+  "total_members": 3,
   "by_published_year": {"2020": 4},
+  "by_genre": [{"id": 1, "name": "Fantasy", "count": 9}],
+  "by_author": [{"id": 4, "name": "Ursula K. Le Guin", "count": 6}],
+  "by_language": {"English": 30, "French": 2},
   "currently_reading": [
     {
       "book_id": 7,
@@ -351,12 +382,20 @@ Returns dashboard statistics:
       "current_page": 120,
       "pages": 320
     }
+  ],
+  "recently_added": [
+    {
+      "book_id": 7,
+      "title": "Example",
+      "cover_url": null,
+      "created_at": "2026-10-24T10:00:00Z"
+    }
   ]
 }
 ```
 
-`current_page` and `pages` are `null` when unknown. Items are ordered by member
-name, then book title.
+`current_page` and `pages` are `null` when unknown. Books without a year,
+language, genre, or author are omitted from the corresponding breakdown.
 
 ---
 
@@ -537,7 +576,7 @@ Examples:
 -   204 No Content
 -   400 Bad Request
 -   404 Not Found
--   409 Conflict (duplicate ISBN or member name)
+-   409 Conflict (duplicate ISBN, member, or tag name)
 -   413 Payload Too Large
 -   422 Validation Error
 -   500 Internal Server Error

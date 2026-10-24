@@ -43,5 +43,9 @@ class NamedEntityRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class TagRead(NamedEntityRead):
+    book_count: int = 0
+
+
 class PublisherRead(NamedEntityRead):
     country: str | None

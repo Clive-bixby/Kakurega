@@ -77,6 +77,7 @@ async function readError(res: Response, fallback: string): Promise<ApiError> {
 export type BookListParams = {
   q?: string;
   genre_id?: number;
+  tag?: string;
   year_from?: number;
   year_to?: number;
   member_id?: number;
@@ -105,7 +106,11 @@ export async function searchBooks(q: string, limit = 50): Promise<BookPage> {
 
 export type Insights = {
   total_books: number;
+  total_members: number;
   by_published_year: Record<string, number>;
+  by_genre: NamedCount[];
+  by_author: NamedCount[];
+  by_language: Record<string, number>;
   currently_reading: {
     book_id: number;
     book_title: string;
@@ -114,6 +119,18 @@ export type Insights = {
     current_page: number | null;
     pages: number | null;
   }[];
+  recently_added: {
+    book_id: number;
+    title: string;
+    cover_url: string | null;
+    created_at: string;
+  }[];
+};
+
+export type NamedCount = {
+  id: number;
+  name: string;
+  count: number;
 };
 
 export async function fetchInsights(): Promise<Insights> {
@@ -271,6 +288,31 @@ export async function createTaxonomy(
   });
   if (!res.ok) throw await readError(res, "Failed to create option");
   return res.json();
+}
+
+export type TagSummary = TaxonomyItem & {
+  book_count: number;
+};
+
+export async function fetchTags(limit = 500): Promise<TagSummary[]> {
+  const res = await fetch(`/api/v1/tags?limit=${limit}`);
+  if (!res.ok) throw await readError(res, "Failed to load tags");
+  return res.json();
+}
+
+export async function renameTag(id: number, name: string): Promise<TagSummary> {
+  const res = await fetch(`/api/v1/tags/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+  if (!res.ok) throw await readError(res, "Failed to rename tag");
+  return res.json();
+}
+
+export async function deleteTag(id: number): Promise<void> {
+  const res = await fetch(`/api/v1/tags/${id}`, { method: "DELETE" });
+  if (!res.ok) throw await readError(res, "Failed to delete tag");
 }
 
 export type ReadingStatus =
