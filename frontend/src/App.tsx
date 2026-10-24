@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "./layouts/AppLayout";
 import { AddBookPage } from "./pages/AddBookPage";
+import { BookDetailsPage } from "./pages/BookDetailsPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { InsightsPage } from "./pages/InsightsPage";
 import { LibraryPage } from "./pages/LibraryPage";
@@ -14,6 +15,7 @@ export default function App() {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="library" element={<LibraryPage />} />
+<Route path="library/:id" element={<BookDetailsPage />} />
         <Route path="add-book" element={<AddBookPage />} />
         <Route path="search" element={<SearchPage />} />
         <Route path="insights" element={<InsightsPage />} />
