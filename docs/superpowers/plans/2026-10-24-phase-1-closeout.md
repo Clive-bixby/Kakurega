@@ -27,7 +27,7 @@ React + TypeScript + Vite.
 | 2 | Bulk import | **Complete** |
 | 3 | Catalog workflow | **Complete** |
 | 4 | Reading tracking | **Complete** |
-| 5 | Tags, notes, filters, dashboard | Not started |
+| 5 | Tags, notes, filters, dashboard | **Complete** |
 
 **Gate (run at the end of every phase, tick before moving on):**
 
@@ -599,6 +599,107 @@ removes their entries; suite and build green.
 - [x] Docs updated (`API.md`, `DATABASE.md`, `SYSTEM_ARCHITECTURE.md`)
 - [x] Status table and `.ai/state.md` updated; phase committed
 
-## Phase 5 — Tags, notes, filters, dashboard (plan written when phase starts)
+## Phase 5 — Tags, notes, filters, dashboard
 
 Source: spec §8.5, §8.9 and §11 Phase 5.
+
+**Goal:** a 1,000-book library can be narrowed to "reading, read by Maya, genre
+Fantasy, 1990–2020" in one request and one screen; tags and notes round-trip;
+the dashboard and insights pages describe the collection accurately.
+
+**Design:**
+
+- No migration. `tags`, `book_tags`, `books.notes`, and
+  `reading_entries.note` already exist.
+- Backend:
+  - `BookFilters.tag` (case-insensitive exact tag name) joins `book_tags`, so
+    `GET /books?tag=Fantasy` filters without changing list-item shape.
+  - `GET /tags` gains `book_count` per tag, ordered by name. `q` and `limit`
+    stay. `POST /tags` returns the same shape. New `PATCH /tags/{id}` (rename,
+    duplicate → 409, blank → 422) and `DELETE /tags/{id}` (204, removes the
+    association rows first so SQLite without FK pragmas stays clean).
+  - `DuplicateTagError` in `app/core/errors.py`.
+  - `GET /insights` becomes aggregate SQL instead of loading every book:
+    `total_books`, `total_members`, `by_published_year`, `by_genre` (top 10),
+    `by_author` (top 10), `by_language`, `currently_reading`, and
+    `recently_added` (5 newest books with title, cover, created_at).
+- Frontend:
+  - API client: `TagSummary`, `book_count`, `fetchTags`, `renameTag`,
+    `deleteTag`, `tag` in `BookListParams`; extended `Insights`.
+  - Library filter bar: debounced search, genre, tag, year from/to, member,
+    status, sort, and a Clear filters action. Any change resets the page
+    offset. Book rows show tag chips resolved from the tag list.
+  - New Tags page (`/tags`, navigation entry): tag counts, inline rename,
+    delete with confirmation, empty state. Library links to it from the filter
+    bar.
+  - Dashboard: total books/members, currently reading, recently added.
+  - Insights page: by-year, top genres, top authors, and language breakdowns
+    using accessible horizontal bars.
+  - Notes remain on Book Details (household note) and Reading (per-person
+    note); tests cover the round-trip.
+- Tests: tag list/rename/delete and tag filtering; extended insights totals,
+  top-10 ordering, languages, recently added; notes round-trip.
+
+### Task 1: Tag filtering and tag management API
+
+**Files:** `backend/app/repositories/book.py`,
+`backend/app/api/v1/routes/books.py`, `backend/app/repositories/taxonomy.py`,
+`backend/app/api/v1/routes/taxonomy.py`, `backend/app/schemas/taxonomy.py`,
+`backend/app/core/errors.py`, `backend/tests/test_tags.py` (new),
+`backend/tests/test_books.py`
+
+- Add `tag` to `BookFilters` and the list route; join `Book.tags` and compare
+  `lower(Tag.name)`.
+- Add `book_count`, rename, and delete to the tag API.
+- Cover duplicate/blank/404 behaviour and association cleanup.
+
+### Task 2: Extended insights
+
+**Files:** `backend/app/api/v1/routes/insights.py`,
+`backend/app/schemas/insights.py`, `backend/tests/test_insights.py`
+
+- Replace full-table loading with grouped queries and limits.
+- Add `total_members`, `by_genre`, `by_author`, `by_language`, and
+  `recently_added`.
+
+### Task 3: Frontend filters and tag management
+
+**Files:** `frontend/src/services/api.ts`, `frontend/src/hooks/useBooks.ts`,
+`frontend/src/pages/LibraryPage.tsx`, `frontend/src/pages/TagsPage.tsx` (new),
+`frontend/src/App.tsx`, `frontend/src/layouts/AppLayout.tsx`,
+`frontend/src/shared/BarList.tsx` (new), `frontend/src/styles.css`
+
+- Full filter bar with debounced text, selects, year range, and clear.
+- Tag chips on each library row.
+- Tags page with counts, rename, delete, and empty state.
+
+### Task 4: Dashboard and insights pages
+
+**Files:** `frontend/src/pages/DashboardPage.tsx`,
+`frontend/src/pages/InsightsPage.tsx`, `frontend/src/shared/BarList.tsx`,
+`frontend/src/styles.css`
+
+- Dashboard: totals, currently reading, recently added.
+- Insights: year, genre, author, and language breakdowns with accessible bars.
+
+### Task 5: Docs and gate
+
+**Files:** `docs/API.md`, `docs/DATABASE.md` (tag count note),
+`docs/SYSTEM_ARCHITECTURE.md`, plan status table, `.ai/state.md`,
+`.ai/memory.md`
+
+- Document `tag`, tag rename/delete, and the extended insights payload.
+- Run the suite, build, and migration cycle; commit.
+
+**Exit criteria:** combining status, member, genre, tag, and year filters returns
+the right books in one request; tags can be renamed and deleted without leaving
+orphans; book/reading notes round-trip; dashboard and insights numbers match the
+catalog; suite and build green.
+
+**Gate:**
+
+- [x] `cd backend && python -m pytest -q` - 112 passed
+- [x] `cd frontend && npm run build` - green
+- [x] No new migration this phase (existing cycle remains green)
+- [x] Docs updated (`API.md`, `DATABASE.md`, `SYSTEM_ARCHITECTURE.md`)
+- [x] Status table and `.ai/state.md` updated; phase committed

@@ -45,7 +45,7 @@ MVP Development
 
 Current Focus
 
-Phased roadmap to daily-use readiness is in progress (plan in `docs/superpowers/plans/`). Phases 1–4 (foundation, bulk import, catalog workflow, reading tracking) are complete; next is tags/notes/filters/dashboard. OCR and Gemini Vision remain future work.
+Phased roadmap to daily-use readiness is in progress (plan in `docs/superpowers/plans/`). Phases 1–5 (foundation, bulk import, catalog workflow, reading tracking, tags/filters/dashboard) are complete. OCR and Gemini Vision remain future work.
 
 ---
 
@@ -129,6 +129,32 @@ Reason: A book with several matching entries must appear once, and count queries
 must stay correct.
 Alternative considered: Joining and `DISTINCT`, which complicates pagination.
 
+Decision: The book tag filter is `?tag=<name>` (case-insensitive exact match),
+not `?tag_id=`.
+Reason: Tags are household labels chosen by name in the UI; a name keeps shareable
+filtered URLs readable and survives tag re-creation with a new id.
+Alternative considered: Filtering by tag id, which the filter bar would have to
+resolve and which breaks when a tag is deleted and re-added.
+
+Decision: Tag `book_count` is derived from `book_tags` in the query; no counter
+column exists.
+Reason: A stored counter can drift, and tag lists are small enough that a grouped
+count is cheap.
+Alternative considered: Maintaining a denormalised count on `tags`.
+
+Decision: Deleting a tag explicitly deletes its `book_tags` rows before deleting
+the tag.
+Reason: SQLite runs without foreign-key pragmas in tests, so `ON DELETE CASCADE`
+alone would leave orphaned associations.
+Alternative considered: Relying only on the database cascade.
+
+Decision: `GET /insights` uses grouped aggregate SQL with fixed limits (top 10
+genres/authors, 5 newest books) rather than loading every book into Python.
+Reason: Dashboard numbers must stay cheap as the library grows and the two pages
+never need the full table.
+Alternative considered: Loading all books and aggregating in Python, which was
+the earlier implementation.
+
 ---
 
 # Established Patterns
@@ -182,7 +208,11 @@ Frontend
 - `StatusBadge` maps reading statuses to labels and badge classes.
 - `ProgressBar` renders accessible derived page progress with tabular numbers.
 - `EmptyState` standardises empty/placeholder panels.
+- `BarList` renders accessible horizontal count bars for insights breakdowns.
 - `ReadingPanel` records one member's reading state for a book.
+- `TagsPage` manages household tags: counts, inline rename, delete, create.
+- Library filter bar composes text, genre, tag, year range, member, status, and
+  sort into one request and resolves `tag_ids` to names from the loaded tag list.
 
 Common hooks
 
@@ -209,7 +239,8 @@ Utilities
 - `app.core.uploads.read_limited` enforces chunked upload limits.
 - `app.core.csv_import.parse_csv` parses Goodreads/Kakurega CSV headers into rows.
 - `ImportService` orchestrates CSV imports; `CatalogRepository` creates named entities case-insensitively.
-- `TaxonomyRepository` lists taxonomy entities and performs committed create-or-get.
+- `TaxonomyRepository` lists taxonomy entities, performs committed create-or-get,
+  and owns tag counts/rename/delete.
 - `BookFilters` carries list-query filters into `BookRepository`.
 
 Infrastructure

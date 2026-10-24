@@ -63,14 +63,14 @@ Docker Compose for PostgreSQL, backend, and frontend. Local image storage under 
 Frontend
 
 - React frontend in `frontend`
-- Routing configured with pages for Dashboard, Library, Add Book, Book Details,
-  Reading, Search, Import, Insights, and Settings
+- Routing configured with pages for Dashboard, Library, Tags, Add Book, Book
+  Details, Reading, Search, Import, Insights, and Settings
 - API client in `frontend/src/services/api.ts`
 - Data fetching hook in `frontend/src/hooks/useBooks.ts`
 - Reusable `BookForm` (add/edit) and `TaxonomyPicker` (chips + debounced
   server search + create)
-- Shared `StatusBadge`, `ProgressBar`, and `EmptyState`; `ReadingPanel` on Book
-  Details
+- Shared `StatusBadge`, `ProgressBar`, `EmptyState`, and `BarList`;
+  `ReadingPanel` on Book Details
 
 Backend
 
@@ -99,6 +99,7 @@ Frontend
 - `TaxonomyPicker` — removable chips, debounced search, create-on-enter
 - `StatusBadge` / `ProgressBar` — reading status and derived page progress
 - `EmptyState` — consistent empty/error-free placeholders
+- `BarList` — accessible horizontal breakdown bars for insights
 - `ReadingPanel` — per-book reading entries and upsert form
 
 Backend
@@ -140,9 +141,9 @@ Frontend
 
 - `GET /api/v1/health`
 - `GET /api/v1/books` — paginated, filterable list; also the search endpoint
-  (`q`, `genre_id`, `year_from`, `year_to`, `member_id`, `status`, `sort`,
-  `limit`, `offset`). Returns `{items, total, limit, offset}`; items omit
-  `description`, `notes`, and resolved taxonomy names.
+  (`q`, `genre_id`, `tag`, `year_from`, `year_to`, `member_id`, `status`,
+  `sort`, `limit`, `offset`). Returns `{items, total, limit, offset}`; items
+  omit `description`, `notes`, and resolved taxonomy names.
 - `GET /api/v1/books/{id}` — full book plus resolved `authors`, `genres`,
   `tags`, and `publisher`
 - `GET /api/v1/books/isbn/{isbn}` — existing book by either ISBN form, 404 when
@@ -151,7 +152,10 @@ Frontend
 - `PUT /api/v1/books/{id}` — `title: null`/blank → 422
 - `DELETE /api/v1/books/{id}`
 - `GET/POST /api/v1/authors`, `/publishers`, `/genres`, `/tags` — taxonomy list
-  (`q`, `limit`) and case-insensitive create-or-get
+  (`q`, `limit`) and case-insensitive create-or-get. `/tags` includes derived
+  `book_count`.
+- `PATCH/DELETE /api/v1/tags/{id}` — rename (duplicate → 409) and delete
+  (removes it from books, keeps the books)
 - `GET/POST /api/v1/members`, `PATCH/DELETE /api/v1/members/{id}` — household
   members; duplicate name → 409, blank → 422
 - `GET /api/v1/books/{id}/reading` — entries for one book
@@ -159,7 +163,8 @@ Frontend
   entry; page > `pages` → 422, finished before started → 422
 - `GET /api/v1/reading?member_id&status` — household entries, newest first
 - `POST /api/v1/import/csv` — Goodreads/Kakurega CSV, 10 MB cap, per-row results
-- `GET /api/v1/insights` — totals, years, and `currently_reading`
+- `GET /api/v1/insights` — totals, by year/genre/author/language,
+  `currently_reading`, and five most recently added books
 - `POST /api/v1/upload/image` — 413 past 5 MB
 - `POST /api/v1/lookup`
 - `POST /api/v1/barcode` — only valid ISBN-10 / 978-979 ISBN-13 accepted
@@ -201,6 +206,8 @@ Identity and indexes
 - `books.created_at` and `books.notes` were added in `0003`.
 - `members.name` is unique case-insensitively (`lower(name)`); reading entries
   index `member_id` and `status` and check the status values.
+- Tags are household-wide; tag `book_count` is derived from `book_tags`, never
+  stored.
 
 Migrations
 
@@ -238,7 +245,7 @@ docs/
 
 Backend follows the planned FastAPI architecture and implements models, repositories, services, schemas, migrations, and tests.
 
-Frontend implements routing, layout, API client, and wired pages for Dashboard, Library, Add Book, Book Details, Reading, Import, Insights, Search, and Settings. Add Book performs ISBN/barcode lookup and duplicate interception; Book Details displays and edits every catalog field and hosts per-member reading tracking; Library filters by member/status; Dashboard lists what is currently being read.
+Frontend implements routing, layout, API client, and wired pages for Dashboard, Library, Tags, Add Book, Book Details, Reading, Import, Insights, Search, and Settings. Add Book performs ISBN/barcode lookup and duplicate interception; Book Details displays and edits every catalog field and hosts per-member reading tracking; Library composes search, genre, tag, year, member, status, and sort filters; Tags supports rename/delete with book counts; Dashboard and Insights render currently-reading, recently-added, and collection breakdowns.
 
 ---
 
@@ -254,7 +261,7 @@ Phased plan: `docs/superpowers/plans/2026-10-24-phase-1-closeout.md`.
 | 2 | Bulk import | **Complete** |
 | 3 | Catalog workflow | **Complete** |
 | 4 | Reading tracking | **Complete** |
-| 5 | Tags, notes, filters, dashboard | Not started |
+| 5 | Tags, notes, filters, dashboard | **Complete** |
 
 ## Foundation
 
@@ -271,6 +278,8 @@ Phased plan: `docs/superpowers/plans/2026-10-24-phase-1-closeout.md`.
 - [x] Paginated / filtered / sorted book list
 - [x] ISBN identity and payload validation
 - [x] Tag schema and CRUD-through-books (`tag_ids`); taxonomy list/create API
+- [x] Tag rename/delete with derived `book_count`
+- [x] Book tag filtering and extended insights breakdowns
 - [x] Book lookup by ISBN for duplicate interception
 - [x] Chunked upload cap (5 MB)
 - [x] Upload
@@ -284,14 +293,15 @@ Phased plan: `docs/superpowers/plans/2026-10-24-phase-1-closeout.md`.
 ## Frontend
 
 - [x] Dashboard
-- [x] Library (paginated, member/status filters)
+- [x] Library (paginated; search, genre, tag, year, member, status, sort)
+- [x] Tags (counts, rename, delete)
 - [x] Book Details (full display and edit, reading panel)
 - [x] Reading (members, activity, filters)
 - [x] Search
 - [x] Add Book (ISBN lookup, barcode capture, manual entry, duplicate link)
 - [x] Catalog workflow (taxonomy pickers, ISBN by-line identity)
 - [x] Import (CSV results panel)
-- [ ] Insights
+- [x] Insights (year, genre, author, language breakdowns)
 - [ ] Settings
 
 ## Identification Pipeline
