@@ -243,7 +243,14 @@ export async function lookupMetadata(query: MetadataQuery): Promise<Metadata> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(query),
   });
-  if (!res.ok) throw await readError(res, "Metadata lookup failed");
+  if (!res.ok) {
+    throw await readError(
+      res,
+      res.status >= 500
+        ? `Metadata lookup failed (HTTP ${res.status}). Is the API running?`
+        : "Metadata lookup failed",
+    );
+  }
   return res.json();
 }
 
