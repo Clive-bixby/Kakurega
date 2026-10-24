@@ -84,6 +84,18 @@ Decision: Alembic migrations touching SQLite constraints use `batch_alter_table`
 Reason: SQLite cannot ALTER constraints; batch mode is required for the test/migration cycle.
 Alternative considered: PostgreSQL-only migrations, which break local verification.
 
+Decision: Import is CSV-only with header inference and never calls metadata APIs.
+Reason: Bulk import must be fast, offline, and free of provider rate limits.
+Alternative considered: Per-row Open Library/Google Books enrichment during import.
+
+Decision: Import process runs per-row savepoints and commits the file once.
+Reason: One bad row must not abort the file or leave half a transaction behind.
+Alternative considered: One transaction per row (slow) or one transaction for everything (all-or-nothing).
+
+Decision: A row with no usable ISBN is deduped by case-insensitive title + author.
+Reason: Re-importing a file with malformed ISBNs must not keep creating rows.
+Alternative considered: ISBN-only dedupe, which duplicates every no-ISBN row on re-import.
+
 ---
 
 # Established Patterns
@@ -151,6 +163,8 @@ Utilities
 - `create_app()` builds the FastAPI application and lifespan.
 - `app.core.isbn` canonicalises and validates ISBNs; use it instead of hand-parsing.
 - `app.core.uploads.read_limited` enforces chunked upload limits.
+- `app.core.csv_import.parse_csv` parses Goodreads/Kakurega CSV headers into rows.
+- `ImportService` orchestrates CSV imports; `CatalogRepository` creates named entities case-insensitively.
 - `BookFilters` carries list-query filters into `BookRepository`.
 
 Infrastructure

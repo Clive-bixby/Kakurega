@@ -63,7 +63,8 @@ Docker Compose for PostgreSQL, backend, and frontend. Local image storage under 
 Frontend
 
 - React frontend in `frontend`
-- Routing configured with pages for Dashboard, Library, Add Book, Book Details, Search, Insights, and Settings
+- Routing configured with pages for Dashboard, Library, Add Book, Book Details,
+  Search, Import, Insights, and Settings
 - API client in `frontend/src/services/api.ts`
 - Data fetching hook in `frontend/src/hooks/useBooks.ts`
 
@@ -73,10 +74,10 @@ Backend
 - Versioned API router under `backend/app/api/v1`
 - Shared route dependencies (`get_db`) in `backend/app/api/deps.py`
 - Core settings, database session factory, and helpers under `backend/app/core`
-  (`config`, `database`, `isbn`, `uploads`, `errors`, `storage`)
+  (`config`, `database`, `isbn`, `csv_import`, `uploads`, `errors`, `storage`)
 - SQLAlchemy models and associations under `backend/app/models`
-- Book repository under `backend/app/repositories`
-- Book, metadata, and barcode services under `backend/app/services`
+- Book and catalog repositories under `backend/app/repositories`
+- Book, metadata, barcode, and import services under `backend/app/services`
 - Alembic migrations under `backend/alembic/versions`
 
 ---
@@ -98,6 +99,9 @@ Backend
 - `app.core.isbn` — ISBN normalisation, checksum, ISBN-10 ↔ 13 conversion
 - `app.core.uploads.read_limited` — chunked upload cap (5 MB)
 - `app.core.errors` — `DomainError`, `DuplicateBookError`, `InvalidReferenceError`
+- `app.core.csv_import.parse_csv` — pure Goodreads/Kakurega CSV parsing
+- `ImportService` — per-row savepoints, duplicate handling, relationships
+- `CatalogRepository` — case-insensitive create-or-get for authors, publishers, genres, tags
 - Metadata lookup service
 - Barcode decoding service
 
@@ -127,6 +131,7 @@ Frontend
 - `POST /api/v1/books` — 409 with `detail.book_id` on duplicate ISBN
 - `PUT /api/v1/books/{id}` — `title: null`/blank → 422
 - `DELETE /api/v1/books/{id}`
+- `POST /api/v1/import/csv` — Goodreads/Kakurega CSV, 10 MB cap, per-row results
 - `GET /api/v1/insights`
 - `POST /api/v1/upload/image` — 413 past 5 MB
 - `POST /api/v1/lookup`
@@ -212,7 +217,7 @@ Phased plan: `docs/superpowers/plans/2026-10-24-phase-1-closeout.md`.
 | Phase | Scope | Status |
 |---|---|---|
 | 1 | Foundation and correctness | **Complete** |
-| 2 | Bulk import | Not started |
+| 2 | Bulk import | **Complete** |
 | 3 | Catalog workflow | Not started |
 | 4 | Reading tracking | Not started |
 | 5 | Tags, notes, filters, dashboard | Not started |
@@ -236,7 +241,7 @@ Phased plan: `docs/superpowers/plans/2026-10-24-phase-1-closeout.md`.
 - [x] Upload
 - [x] Barcode (ISBN-only)
 - [x] Metadata Lookup
-- [ ] Bulk import
+- [x] CSV / Goodreads bulk import
 - [ ] Reading tracking
 - [ ] OCR
 - [ ] Gemini Vision
@@ -248,6 +253,7 @@ Phased plan: `docs/superpowers/plans/2026-10-24-phase-1-closeout.md`.
 - [x] Book Details
 - [x] Search
 - [x] Add Book
+- [x] Import (CSV results panel)
 - [ ] Insights
 - [ ] Settings
 
