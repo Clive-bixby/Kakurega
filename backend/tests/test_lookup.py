@@ -73,17 +73,17 @@ def open_library_payload(**overrides):
     return {"ISBN:9780140328721": payload}
 
 
-def google_payload():
+def google_payload(isbn: str = "9780140328721", title: str = "Dune"):
     return {
         "items": [
             {
                 "volumeInfo": {
-                    "title": "Dune",
+                    "title": title,
                     "authors": ["Frank Herbert"],
                     "publisher": "Chilton",
                     "publishedDate": "1965",
                     "industryIdentifiers": [
-                        {"type": "ISBN_13", "identifier": "9780441013593"}
+                        {"type": "ISBN_13", "identifier": isbn}
                     ],
                     "description": "A novel",
                     "imageLinks": {"thumbnail": "https://example.com/dune.jpg"},
@@ -115,7 +115,7 @@ def test_open_library_404_falls_back_to_google(client, monkeypatch):
         monkeypatch,
         {
             OPEN_LIBRARY_URL: FakeResponse({}, status_code=404),
-            GOOGLE_BOOKS_URL: FakeResponse(google_payload()),
+            GOOGLE_BOOKS_URL: FakeResponse(google_payload(isbn="9789388304771")),
         },
     )
 
@@ -126,6 +126,20 @@ def test_open_library_404_falls_back_to_google(client, monkeypatch):
     assert data["title"] == "Dune"
     assert data["source"] == "google_books"
     assert [call["url"] for call in calls] == [OPEN_LIBRARY_URL, GOOGLE_BOOKS_URL]
+
+
+def test_google_volume_for_a_different_isbn_is_rejected(client, monkeypatch):
+    install(
+        monkeypatch,
+        {
+            OPEN_LIBRARY_URL: FakeResponse({}),
+            GOOGLE_BOOKS_URL: FakeResponse(google_payload(isbn="9780441013593")),
+        },
+    )
+
+    response = client.post("/api/v1/lookup", json={"isbn": "9789388304771"})
+
+    assert response.status_code == 404
 
 
 def test_open_library_failure_then_google_quota(client, monkeypatch):

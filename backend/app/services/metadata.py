@@ -137,6 +137,35 @@ def _safe_result(builder, payload: dict) -> dict | None:
         return None
 
 
+def _volume_has_isbn(item: dict, isbn: str) -> bool:
+    info = item.get("volumeInfo")
+    if not isinstance(info, dict):
+        return False
+    identifiers = info.get("industryIdentifiers")
+    if not isinstance(identifiers, list):
+        return False
+    for identifier in identifiers:
+        if not isinstance(identifier, dict):
+            continue
+        value = identifier.get("identifier")
+        if isinstance(value, str) and value.replace("-", "") == isbn:
+            return True
+    return False
+
+
+def _first_google_match(items: list, isbn: str | None) -> dict | None:
+    """Google's search is fuzzy, so never accept a volume for a different ISBN."""
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        if isbn and not _volume_has_isbn(item, isbn):
+            continue
+        result = _safe_result(_google_books_result, item)
+        if result:
+            return result
+    return None
+
+
 def _open_library_result(data: dict) -> dict | None:
     if not data or not data.get("title"):
         return None
@@ -329,7 +358,7 @@ def lookup_google_books(
     if not query:
         return None, NOT_FOUND
 
-    params = {"q": query, "maxResults": 1}
+    params = {"q": query, "maxResults": 5 if isbn else 1}
     api_key = get_settings().google_books_api_key.strip()
     if api_key:
         params["key"] = api_key
@@ -346,11 +375,7 @@ def lookup_google_books(
             if payload is None:
                 return None, UNAVAILABLE
             items = payload.get("items") or []
-            result = (
-                _safe_result(_google_books_result, items[0])
-                if items
-                else None
-            )
+            result = _first_google_match(items, isbn)
             return (result, None) if result else (None, NOT_FOUND)
     except httpx.TimeoutException:
         logger.warning("Google Books request timed out")
