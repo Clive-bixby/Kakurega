@@ -75,6 +75,10 @@ Frontend
   search (`Ctrl/Cmd+K`), layered surface cards, pill chips, thin progress bars,
   cover grid; content column capped at 1240px. Tokens follow
   `design/stitch/theme/DESIGN.md`.
+- Brand assets in `frontend/public`: `icon.svg` (detailed install icon),
+  `favicon.svg` (bold small-size mark used in the tab and sidebar), `logo.svg`
+  lockup, PNG derivatives (`icon-192/512`, `apple-touch-icon`, `favicon-32/48`),
+  and `site.webmanifest`. `BookCover` reuses `favicon.svg` for cover fallbacks.
 
 Backend
 

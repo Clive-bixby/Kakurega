@@ -318,6 +318,12 @@ Do not repeat information already documented elsewhere unless it is critical.
 
 When a mistake leads to a permanent improvement, record it here.
 
+- Icon PNGs are rendered once at 512 px and downscaled with Pillow LANCZOS:
+  headless Edge enforces a ~500 px minimum window, so screenshotting at 32/48 px
+  crops the artwork.
+- Two brand marks are intentional: the detailed emblem for large sizes, and a
+  simplified bold mark for the favicon/sidebar where thin gold lines vanish.
+
 Examples:
 
 "We no longer expose repositories directly to routes."
