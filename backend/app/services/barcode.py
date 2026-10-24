@@ -1,13 +1,24 @@
 import io
 import re
 
-from PIL import Image
 import zxingcpp
+from PIL import Image
+
+from app.core.isbn import is_valid_isbn10, is_valid_isbn13
+
+_BARCODE_CHARS = re.compile(r"[^0-9Xx]")
 
 
-def _normalize_isbn(value: str) -> str | None:
-    cleaned = value.strip().replace("-", "").replace(" ", "")
-    if re.fullmatch(r"\d{9}[\dX]", cleaned) or re.fullmatch(r"\d{13}", cleaned):
+def isbn_from_barcode_text(value: str) -> str | None:
+    """Return a valid book ISBN from a decoded barcode, else None."""
+    cleaned = _BARCODE_CHARS.sub("", value or "").upper()
+    if len(cleaned) == 10 and is_valid_isbn10(cleaned):
+        return cleaned
+    if (
+        len(cleaned) == 13
+        and cleaned.startswith(("978", "979"))
+        and is_valid_isbn13(cleaned)
+    ):
         return cleaned
     return None
 
@@ -20,7 +31,7 @@ def decode_barcode(image_bytes: bytes) -> str | None:
         raise ValueError("Invalid image") from exc
 
     for result in results:
-        isbn = _normalize_isbn(getattr(result, "text", ""))
+        isbn = isbn_from_barcode_text(getattr(result, "text", ""))
         if isbn:
             return isbn
     return None

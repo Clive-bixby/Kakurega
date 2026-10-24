@@ -14,6 +14,7 @@ import app.models.author  # noqa: F401
 import app.models.book  # noqa: F401
 import app.models.genre  # noqa: F401
 import app.models.publisher  # noqa: F401
+import app.models.tag  # noqa: F401
 import app.models.associations  # noqa: F401
 
 config = context.config

@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.models.book import Book
-from app.repositories.book import BookRepository
+from app.repositories.book import BookFilters, BookRepository
 from app.schemas.book import BookCreate, BookUpdate
 
 
@@ -9,8 +9,14 @@ class BookService:
     def __init__(self, db: Session):
         self.repo = BookRepository(db)
 
-    def list_books(self) -> list[Book]:
-        return self.repo.list()
+    def list_books(
+        self,
+        filters: BookFilters,
+        limit: int,
+        offset: int,
+        sort: str = "title",
+    ) -> tuple[list[Book], int]:
+        return self.repo.list(filters, limit, offset, sort)
 
     def get_book(self, book_id: int) -> Book | None:
         return self.repo.get(book_id)

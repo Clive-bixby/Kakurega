@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { PageHeader } from "../shared/PageHeader";
-import { Book, searchBooks } from "../services/api";
+import { BookListItem, searchBooks } from "../services/api";
 
 export function SearchPage() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Book[]>([]);
+  const [results, setResults] = useState<BookListItem[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
@@ -17,8 +18,9 @@ export function SearchPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await searchBooks(query.trim());
-      setResults(data);
+      const page = await searchBooks(query.trim());
+      setResults(page.items);
+      setTotal(page.total);
       setSearched(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed");
@@ -31,17 +33,24 @@ export function SearchPage() {
     <div>
       <PageHeader title="Search" />
       <form onSubmit={handleSubmit}>
-        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search books" />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search title, author, ISBN..."
+          aria-label="Search books"
+        />
         <button type="submit" disabled={loading}>
           {loading ? "Searching..." : "Search"}
         </button>
       </form>
-      {error && <p>{error}</p>}
+      {error && <p role="alert">{error}</p>}
       {searched && results.length === 0 && <p>No results</p>}
+      {searched && results.length > 0 && <p>{total} results</p>}
       <ul>
         {results.map((book) => (
           <li key={book.id}>
             <Link to={`/library/${book.id}`}>{book.title}</Link>
+            {book.published_year ? ` (${book.published_year})` : ""}
           </li>
         ))}
       </ul>

@@ -61,7 +61,7 @@ PostgreSQL      Local Storage    External Services
 -   React
 -   Vite
 -   TypeScript
--   Tailwind CSS
+-   Plain CSS (`styles.css`), not Tailwind
 -   React Router
 
 ### Backend
@@ -90,9 +90,11 @@ PostgreSQL      Local Storage    External Services
 Initially local filesystem:
 
 ``` text
-storage/
-└── images/
+backend/storage/images/
 ```
+
+Served by the API at `/storage/images/<file>` (`StaticFiles` mount). Docker
+Compose keeps it in the `backend_storage` named volume.
 
 Future: - AWS S3 - Google Cloud Storage
 
@@ -202,9 +204,13 @@ Uses zxing-cpp with Pillow for local image decoding.
 
 ## 9. Search
 
-Current: - PostgreSQL Full Text Search
+Current: - Case-insensitive `ILIKE` matching in `GET /books?q=...`
 
-Fields: - Title - Author - ISBN - Publisher - Genre - Tags - Notes
+Fields: - Title - Subtitle - ISBN - Description - Author - Publisher
+
+`Genres` and `Notes` are not searched yet; genre is a filter
+(`?genre_id=`). `%`, `_`, and `\` are treated literally. Paginated 50 rows at a
+time by default.
 
 Future: - Vector embeddings - Semantic search
 

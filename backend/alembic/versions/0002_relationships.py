@@ -33,7 +33,10 @@ def upgrade():
         sa.Column("name", sa.String(length=100), nullable=False),
     )
     op.add_column("books", sa.Column("publisher_id", sa.Integer(), nullable=True))
-    op.create_foreign_key("fk_books_publisher_id", "books", "publishers", ["publisher_id"], ["id"])
+    with op.batch_alter_table("books") as batch:
+        batch.create_foreign_key(
+            "fk_books_publisher_id", "publishers", ["publisher_id"], ["id"]
+        )
     op.create_table(
         "book_authors",
         sa.Column("book_id", sa.Integer(), sa.ForeignKey("books.id"), primary_key=True),
@@ -49,8 +52,9 @@ def upgrade():
 def downgrade():
     op.drop_table("book_genres")
     op.drop_table("book_authors")
-    op.drop_constraint("fk_books_publisher_id", "books", type_="foreignkey")
-    op.drop_column("books", "publisher_id")
+    with op.batch_alter_table("books") as batch:
+        batch.drop_constraint("fk_books_publisher_id", type_="foreignkey")
+        batch.drop_column("publisher_id")
     op.drop_table("genres")
     op.drop_table("publishers")
     op.drop_table("authors")

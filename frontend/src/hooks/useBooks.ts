@@ -1,18 +1,31 @@
 import { useEffect, useState } from "react";
 
-import { Book, fetchBooks } from "../services/api";
+import { BookListParams, BookPage, fetchBooks } from "../services/api";
 
-export function useBooks() {
-  const [books, setBooks] = useState<Book[]>([]);
+export function useBooks(params: BookListParams = {}) {
+  const [page, setPage] = useState<BookPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchBooks()
-      .then(setBooks)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
+  const { q, genre_id, year_from, year_to, sort, limit, offset } = params;
 
-  return { books, loading, error };
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetchBooks({ q, genre_id, year_from, year_to, sort, limit, offset })
+      .then((data) => {
+        if (!cancelled) setPage(data);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e.message);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [q, genre_id, year_from, year_to, sort, limit, offset]);
+
+  return { page, books: page?.items ?? [], total: page?.total ?? 0, loading, error };
 }

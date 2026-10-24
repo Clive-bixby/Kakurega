@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     app_name: str = Field(default="Kakurega API")
     environment: str = Field(default="development")
-    debug: bool = Field(default=True)
+    debug: bool = Field(default=False)
     api_v1_prefix: str = Field(default="/api/v1")
     database_url: str = Field(
         default="postgresql+psycopg://kakurega:kakurega_password@localhost:5432/kakurega"

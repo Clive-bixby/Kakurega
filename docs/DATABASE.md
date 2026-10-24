@@ -19,14 +19,14 @@ The following tables are implemented and migrated:
 - `genres`
 - `book_authors`
 - `book_genres`
+- `tags`
+- `book_tags`
 
 The following are planned but not yet implemented:
 
 - `series`
 - `book_copies`
-- `tags`
-- `book_tags`
-- user and reading tables
+- user, reading, and import staging tables
 
 ### Book
 
@@ -36,6 +36,7 @@ The following are planned but not yet implemented:
 -   isbn10
 -   isbn13
 -   description
+-   notes
 -   pages
 -   language
 -   published_year
@@ -43,7 +44,11 @@ The following are planned but not yet implemented:
 -   google_books_id
 -   openlibrary_id
 -   publisher_id (FK)
--   series_id (FK)
+-   created_at
+
+`isbn10` and `isbn13` are unique when present (partial unique indexes), and an
+ISBN-10 is stored together with its derived ISBN-13. `title` is indexed, as are
+`published_year` and `publisher_id`.
 
 ### Author
 
@@ -94,12 +99,12 @@ Represents a physical copy owned.
 ### Tag
 
 -   id
--   name
+-   name (unique case-insensitively)
 
 ### BookTag
 
--   book_copy_id
--   tag_id
+-   book_id (FK, cascades)
+-   tag_id (FK, cascades)
 
 ## Future Tables
 
@@ -167,8 +172,10 @@ UserBook (Future)
 ## Notes
 
 -   Book stores universal metadata.
--   BookCopy stores ownership information.
--   UserBook stores personal reading information.
+-   BookCopy stores ownership information (not implemented yet).
+-   UserBook stores personal reading information (not implemented yet).
 -   Author, Publisher, and Genre relationships are implemented.
--   Series, BookCopy, Tag, and user tables remain future work.
+-   ISBN is the book's identity: unique partial indexes plus canonicalisation to
+      ISBN-13 prevent duplicate rows.
+-   Series, BookCopy, and user/reading tables remain future work.
 -   This schema supports future family accounts without major redesign.

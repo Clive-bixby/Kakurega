@@ -1,21 +1,13 @@
 from collections import Counter
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.api.deps import get_db
 from app.models.book import Book
 from app.schemas.insights import InsightsResponse
 
 router = APIRouter()
-
-
-def get_db(request: Request):
-    factory = request.app.state.session_factory
-    db = factory()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.get("", response_model=InsightsResponse)

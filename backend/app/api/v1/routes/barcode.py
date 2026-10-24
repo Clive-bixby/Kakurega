@@ -1,5 +1,6 @@
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
+from app.core.uploads import FileTooLargeError, read_limited
 from app.schemas.barcode import BarcodeResponse
 from app.services.barcode import decode_barcode
 
@@ -14,11 +15,13 @@ async def detect_barcode(file: UploadFile = File(...)):
     if file.content_type not in ALLOWED_MIME_TYPES:
         raise HTTPException(status_code=400, detail="Unsupported image type")
 
-    contents = await file.read()
+    try:
+        contents = await read_limited(file, MAX_FILE_SIZE)
+    except FileTooLargeError as exc:
+        raise HTTPException(status_code=413, detail="File too large") from exc
+
     if not contents:
         raise HTTPException(status_code=400, detail="Empty file")
-    if len(contents) > MAX_FILE_SIZE:
-        raise HTTPException(status_code=400, detail="File too large")
 
     try:
         isbn = decode_barcode(contents)

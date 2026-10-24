@@ -15,22 +15,25 @@
 -   Authentication: None (v1)
 -   Future: JWT Authentication
 
-Standard success response:
+Standard success response: the resource object itself (or, for lists, a page
+object). There is no `{success, data}` envelope.
+
+Standard error response (FastAPI/Pydantic):
 
 ``` json
 {
-  "success": true,
-  "data": {}
+  "detail": "Human readable message or validation details"
 }
 ```
 
-Standard error response:
+A duplicate ISBN returns `409` with the existing book's id:
 
 ``` json
 {
-  "success": false,
-  "message": "Human readable message",
-  "code": "ERROR_CODE"
+  "detail": {
+    "message": "Book with this ISBN already exists",
+    "book_id": 7
+  }
 }
 ```
 
@@ -40,31 +43,47 @@ Standard error response:
 
 ## GET /books
 
-Returns all books.
+Returns a paginated page of books. This is also the search endpoint.
+
+Query parameters:
+
+| Name | Type | Default | Notes |
+|---|---|---|---|
+| `q` | string | | Free text over title, subtitle, ISBNs, description, author and publisher names. `%`, `_`, and `\` are literal. A valid ISBN matches either ISBN form, with or without hyphens. |
+| `genre_id` | int | | Only books in this genre |
+| `year_from` / `year_to` | int | | Inclusive publication-year range |
+| `sort` | `title` \| `added` \| `year` | `title` | `added` is newest first, `year` is newest publication first |
+| `limit` | int | 50 | 1–200 |
+| `offset` | int | 0 | |
 
 Response:
 
 ```json
-[
-  {
-    "id": 1,
-    "title": "Example",
-    "subtitle": null,
-    "isbn10": null,
-    "isbn13": null,
-    "description": null,
-    "pages": null,
-    "language": null,
-    "published_year": null,
-    "cover_url": null,
-    "google_books_id": null,
-    "openlibrary_id": null,
-    "publisher_id": null,
-    "author_ids": [],
-    "genre_ids": []
-  }
-]
+{
+  "items": [
+    {
+      "id": 1,
+      "title": "Example",
+      "subtitle": null,
+      "isbn10": null,
+      "isbn13": null,
+      "pages": null,
+      "language": null,
+      "published_year": null,
+      "cover_url": null,
+      "publisher_id": null,
+      "author_ids": [],
+      "genre_ids": [],
+      "created_at": "2026-10-24T10:00:00Z"
+    }
+  ],
+  "total": 1,
+  "limit": 50,
+  "offset": 0
+}
 ```
+
+List items omit `description` and `notes`; fetch `GET /books/{id}` for those.
 
 ------------------------------------------------------------------------
 
@@ -99,7 +118,18 @@ Request body:
 }
 ```
 
-Returns the created book. Invalid `publisher_id`, `author_ids`, or `genre_ids` return 400.
+Returns the created book.
+
+Validation rules:
+
+- `title` is trimmed and must be 1–500 characters.
+- `pages` is 1–100,000; `published_year` is 1000 to next year.
+- ISBNs are normalised (hyphens/spaces removed, `x` uppercased) and must pass
+  checksum validation. An ISBN-10 is converted and stored alongside its derived
+  ISBN-13; both forms identify the same book.
+- Invalid `publisher_id`, `author_ids`, or `genre_ids` return 400.
+- A book with an existing ISBN (either form) returns 409 with
+  `detail.book_id`.
 
 ------------------------------------------------------------------------
 
@@ -107,8 +137,10 @@ Returns the created book. Invalid `publisher_id`, `author_ids`, or `genre_ids` r
 
 Updates book metadata.
 
-Request body accepts the same fields as create, all optional. Returns 404 when the book does not exist and 400 for invalid relationship IDs.
-
+Request body accepts the same fields as create, all optional. Omitting a field
+leaves it unchanged; setting `title` to `null` or blank returns 422. Returns 404
+when the book does not exist, 400 for invalid relationship IDs, and 409 when the
+new ISBN belongs to another book.
 ------------------------------------------------------------------------
 
 ## DELETE /books/{id}
@@ -214,7 +246,8 @@ Returns 404 when no match is found and 502 when both upstreams fail.
 
 # 5. Search
 
-## GET /search
+`GET /search` has been removed. Search is part of `GET /books` (`?q=...`), so
+results are paginated and filterable in one request.
 
 Searches books by title, ISBN, and description.
 
@@ -271,6 +304,8 @@ Returns dashboard statistics:
 
 # 11. Import / Export
 
+Planned for the next phase — not implemented yet.
+
 ## POST /import
 
 Supported:
@@ -309,7 +344,8 @@ Examples:
 -   204 No Content
 -   400 Bad Request
 -   404 Not Found
--   409 Conflict
+-   409 Conflict (duplicate ISBN)
+-   413 Payload Too Large
 -   422 Validation Error
 -   500 Internal Server Error
 
@@ -343,7 +379,7 @@ Users
 
 -   RESTful naming
 -   Consistent JSON responses
--   Pagination on list endpoints
+-   Pagination on list endpoints (implemented on `GET /books`)
 -   Validation via Pydantic
 -   Business logic only in service layer
 -   Versioned endpoints (`/api/v1`)

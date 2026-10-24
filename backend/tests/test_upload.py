@@ -66,4 +66,4 @@ def test_upload_oversized_file(client):
         "/api/v1/upload/image",
         files={"file": ("big.png", io.BytesIO(b"x" * (5 * 1024 * 1024 + 1)), "image/png")},
     )
-    assert response.status_code == 400
+    assert response.status_code == 413
