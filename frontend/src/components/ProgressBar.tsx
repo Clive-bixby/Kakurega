@@ -2,11 +2,17 @@ type Props = {
   current: number | null;
   total: number | null;
   label?: string;
+  showText?: boolean;
 };
 
-export function ProgressBar({ current, total, label }: Props) {
+export function ProgressBar({
+  current,
+  total,
+  label,
+  showText = true,
+}: Props) {
   if (total == null || total <= 0) {
-    if (current == null) return null;
+    if (current == null || !showText) return null;
     return (
       <span className="progress-text">
         Page <span className="tabular">{current}</span>
@@ -30,11 +36,13 @@ export function ProgressBar({ current, total, label }: Props) {
       >
         <div className="progress-fill" style={{ width: `${percent}%` }} />
       </div>
-      <span className="progress-text">
-        <span className="tabular">{value}</span> /{" "}
-        <span className="tabular">{total}</span> pages
-        <span className="progress-percent tabular"> · {percent}%</span>
-      </span>
+      {showText && (
+        <span className="progress-text">
+          <span className="tabular">{value}</span> /{" "}
+          <span className="tabular">{total}</span> pages
+          <span className="progress-percent tabular"> · {percent}%</span>
+        </span>
+      )}
     </div>
   );
 }

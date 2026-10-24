@@ -95,6 +95,7 @@ export function DashboardPage() {
                       current={current.current_page}
                       total={current.pages}
                       label={`${current.member_name}'s progress in ${current.book_title}`}
+                      showText={false}
                     />
                   </div>
                   <div className="hero-actions">
