@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from sqlalchemy import distinct, func, or_, select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.errors import DuplicateBookError, InvalidReferenceError
 from app.core.isbn import isbn_search_terms
@@ -98,7 +98,11 @@ class BookRepository:
 
         total = self.db.execute(count_statement).scalar_one()
         statement = (
-            statement.options(selectinload(Book.authors), selectinload(Book.genres))
+            statement.options(
+                selectinload(Book.authors),
+                selectinload(Book.genres),
+                selectinload(Book.tags),
+            )
             .offset(offset)
             .limit(limit)
         )
@@ -109,9 +113,14 @@ class BookRepository:
         statement = (
             select(Book)
             .where(Book.id == book_id)
-            .options(selectinload(Book.authors), selectinload(Book.genres))
+            .options(
+                selectinload(Book.authors),
+                selectinload(Book.genres),
+                selectinload(Book.tags),
+                joinedload(Book.publisher),
+            )
         )
-        return self.db.execute(statement).scalars().first()
+        return self.db.execute(statement).scalars().unique().first()
 
     def find_by_isbn(
         self, isbn10: str | None, isbn13: str | None, exclude_id: int | None = None
@@ -139,7 +148,7 @@ class BookRepository:
             )
         return self.db.execute(statement).scalars().first()
 
-    def _validate_ids(self, publisher_id, author_ids, genre_ids):
+    def _validate_ids(self, publisher_id, author_ids, genre_ids, tag_ids=None):
         if publisher_id is not None and self.db.get(Publisher, publisher_id) is None:
             raise InvalidReferenceError("Publisher not found")
         for author_id in author_ids or []:
@@ -148,6 +157,9 @@ class BookRepository:
         for genre_id in genre_ids or []:
             if self.db.get(Genre, genre_id) is None:
                 raise InvalidReferenceError("Genre not found")
+        for tag_id in tag_ids or []:
+            if self.db.get(Tag, tag_id) is None:
+                raise InvalidReferenceError("Tag not found")
 
     def _ensure_unique_isbn(self, isbn10, isbn13, exclude_id=None) -> None:
         existing = self.find_by_isbn(isbn10, isbn13, exclude_id)
@@ -155,10 +167,12 @@ class BookRepository:
             raise DuplicateBookError(existing.id)
 
     def create(self, data: BookCreate, commit: bool = True) -> Book:
-        self._validate_ids(data.publisher_id, data.author_ids, data.genre_ids)
+        self._validate_ids(
+            data.publisher_id, data.author_ids, data.genre_ids, data.tag_ids
+        )
         self._ensure_unique_isbn(data.isbn10, data.isbn13)
 
-        payload = data.model_dump(exclude={"author_ids", "genre_ids"})
+        payload = data.model_dump(exclude={"author_ids", "genre_ids", "tag_ids"})
         book = Book(**payload)
         if data.author_ids:
             book.authors = (
@@ -167,6 +181,10 @@ class BookRepository:
         if data.genre_ids:
             book.genres = (
                 self.db.query(Genre).filter(Genre.id.in_(data.genre_ids)).all()
+            )
+        if data.tag_ids:
+            book.tags = (
+                self.db.query(Tag).filter(Tag.id.in_(data.tag_ids)).all()
             )
         self.db.add(book)
         if not commit:
@@ -185,6 +203,7 @@ class BookRepository:
         values = data.model_dump(exclude_unset=True)
         author_ids = values.pop("author_ids", None)
         genre_ids = values.pop("genre_ids", None)
+        tag_ids = values.pop("tag_ids", None)
         has_publisher = "publisher_id" in values
         publisher_id = values.pop("publisher_id", None)
 
@@ -192,6 +211,7 @@ class BookRepository:
             publisher_id if has_publisher else None,
             author_ids,
             genre_ids,
+            tag_ids,
         )
         if "isbn10" in values or "isbn13" in values:
             self._ensure_unique_isbn(
@@ -214,6 +234,12 @@ class BookRepository:
             book.genres = (
                 self.db.query(Genre).filter(Genre.id.in_(genre_ids)).all()
                 if genre_ids
+                else []
+            )
+        if tag_ids is not None:
+            book.tags = (
+                self.db.query(Tag).filter(Tag.id.in_(tag_ids)).all()
+                if tag_ids
                 else []
             )
         if not commit:

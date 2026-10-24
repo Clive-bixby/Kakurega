@@ -142,8 +142,8 @@ frontend/
 └── utils/
 ```
 
-Main pages: - Dashboard - Library - Book Details - Add Book - Insights -
-Search - Settings
+Main pages: - Dashboard - Library - Book Details - Add Book - Import -
+Insights - Settings
 
 ------------------------------------------------------------------------
 
@@ -179,6 +179,49 @@ Barcode Detection
              ▼
           Save Book
 ```
+
+------------------------------------------------------------------------
+
+## 7.1 Catalog Workflow (Add and Edit)
+
+Adding a book is a client-driven flow; the server only supplies data and
+enforces identity.
+
+``` text
+Add Book page
+      │  ISBN typed ──────────────┐
+      │  Barcode photo ──► /barcode┤
+      ▼                           ▼
+ /lookup (Open Library → Google Books)
+      │
+      ├── found ──► prefilled editable form
+      └── not found ──► empty form + notice
+                              │
+                              ▼
+                 /books/isbn/{isbn} check
+                     │            │
+                  existing      404
+                     │            ▼
+        "Already in library"    POST /books
+                                   │
+                        409 duplicate (detail.book_id)
+                                   ▼
+                        "Open the existing book"
+```
+
+- `BookForm` is shared by Add Book and Book Details. Fields: title, subtitle,
+  both ISBNs, pages, year, language, cover (URL or upload), publisher, authors,
+  genres, tags, description, notes.
+- `TaxonomyPicker` debounces `GET /authors|publishers|genres|tags?q=`, filters
+  already-selected items, and offers `Add "<name>"`. New names are only sent to
+  `POST` when the form is saved, so cancelling never pollutes the catalog.
+- Lookup authors and publisher arrive as names; they resolve to ids through the
+  create-or-get endpoints on save.
+- ISBN entries are still canonicalised and validated server-side; the UI's
+  pre-check is an optimisation, not the source of truth.
+- `GET /books/{id}` returns resolved `authors`, `genres`, `tags`, and
+  `publisher` objects so Book Details can render and prefill without extra
+  requests for each name.
 
 ------------------------------------------------------------------------
 

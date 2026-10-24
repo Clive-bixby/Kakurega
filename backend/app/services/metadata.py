@@ -46,6 +46,7 @@ def _open_library_result(data: dict) -> dict | None:
         "isbn13": isbn13,
         "description": data.get("excerpts", [{}])[0].get("text") if data.get("excerpts") else None,
         "cover_url": cover.get("large") or cover.get("medium") or cover.get("small"),
+        "pages": data.get("number_of_pages"),
         "source": "open_library",
         "confidence": 0.9,
     }
@@ -66,6 +67,7 @@ def _open_library_search_result(doc: dict) -> dict | None:
         "isbn13": isbn13,
         "description": None,
         "cover_url": cover_url,
+        "pages": doc.get("number_of_pages_median"),
         "source": "open_library",
         "confidence": 0.75,
     }
@@ -88,6 +90,7 @@ def _google_books_result(item: dict) -> dict | None:
         "isbn13": isbn13,
         "description": info.get("description"),
         "cover_url": image_links.get("thumbnail") or image_links.get("smallThumbnail"),
+        "pages": info.get("pageCount"),
         "source": "google_books",
         "confidence": 0.8,
     }

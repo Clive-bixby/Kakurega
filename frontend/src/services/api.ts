@@ -13,12 +13,20 @@ export type Book = {
   google_books_id: string | null;
   openlibrary_id: string | null;
   publisher_id: number | null;
+  publisher: TaxonomyItem | null;
+  authors: TaxonomyItem[];
+  genres: TaxonomyItem[];
+  tags: TaxonomyItem[];
   author_ids: number[];
   genre_ids: number[];
+  tag_ids: number[];
   created_at: string;
 };
 
-export type BookListItem = Omit<Book, "description" | "notes">;
+export type BookListItem = Omit<
+  Book,
+  "description" | "notes" | "publisher" | "authors" | "genres" | "tags"
+>;
 
 export type BookPage = {
   items: BookListItem[];
@@ -27,7 +35,44 @@ export type BookPage = {
   offset: number;
 };
 
-export type BookInput = Partial<Omit<Book, "id" | "created_at">> & { title: string };
+export type BookInput = Partial<
+  Omit<
+    Book,
+    "id" | "created_at" | "publisher" | "authors" | "genres" | "tags"
+  >
+> & { title: string };
+
+export class ApiError extends Error {
+  status: number;
+  bookId?: number;
+
+  constructor(message: string, status: number, bookId?: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.bookId = bookId;
+  }
+}
+
+async function readError(res: Response, fallback: string): Promise<ApiError> {
+  let message = fallback;
+  let bookId: number | undefined;
+  try {
+    const body = await res.json();
+    const detail = body?.detail;
+    if (typeof detail === "string") {
+      message = detail;
+    } else if (Array.isArray(detail)) {
+      message = "Validation failed";
+    } else if (detail && typeof detail === "object") {
+      if (typeof detail.message === "string") message = detail.message;
+      if (typeof detail.book_id === "number") bookId = detail.book_id;
+    }
+  } catch {
+    // Keep the fallback when the body is not JSON.
+  }
+  return new ApiError(message, res.status, bookId);
+}
 
 export type BookListParams = {
   q?: string;
@@ -79,7 +124,7 @@ export async function updateBook(id: number, data: BookInput): Promise<Book> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Failed to update book");
+  if (!res.ok) throw await readError(res, "Failed to update book");
   return res.json();
 }
 
@@ -107,7 +152,7 @@ export async function createBook(data: BookInput): Promise<Book> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Failed to create book");
+  if (!res.ok) throw await readError(res, "Failed to create book");
   return res.json();
 }
 
@@ -136,15 +181,84 @@ export async function importCsv(
     method: "POST",
     body: form,
   });
-  if (!res.ok) {
-    let message = "Failed to import";
-    try {
-      const data = await res.json();
-      if (typeof data.detail === "string") message = data.detail;
-    } catch {
-      // Keep the generic message when the body is not JSON.
-    }
-    throw new Error(message);
-  }
+  if (!res.ok) throw await readError(res, "Failed to import");
+  return res.json();
+}
+
+export type Metadata = {
+  title: string;
+  authors: string[];
+  publisher: string | null;
+  published_year: number | null;
+  isbn10: string | null;
+  isbn13: string | null;
+  description: string | null;
+  cover_url: string | null;
+  pages: number | null;
+  source: string;
+  confidence: number;
+};
+
+export type MetadataQuery = {
+  isbn?: string;
+  title?: string;
+  author?: string;
+};
+
+export async function lookupMetadata(query: MetadataQuery): Promise<Metadata> {
+  const res = await fetch("/api/v1/lookup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(query),
+  });
+  if (!res.ok) throw await readError(res, "Metadata lookup failed");
+  return res.json();
+}
+
+export async function decodeBarcode(file: File): Promise<{ isbn: string }> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch("/api/v1/barcode", { method: "POST", body: form });
+  if (!res.ok) throw await readError(res, "No barcode found");
+  return res.json();
+}
+
+export async function fetchBookByIsbn(isbn: string): Promise<Book> {
+  const res = await fetch(`/api/v1/books/isbn/${encodeURIComponent(isbn)}`);
+  if (!res.ok) throw await readError(res, "Book not found");
+  return res.json();
+}
+
+export type TaxonomyKind = "authors" | "publishers" | "genres" | "tags";
+
+export type TaxonomyItem = {
+  id: number;
+  name: string;
+  country?: string | null;
+};
+
+export async function searchTaxonomy(
+  kind: TaxonomyKind,
+  q = "",
+  limit = 50,
+): Promise<TaxonomyItem[]> {
+  const search = new URLSearchParams();
+  if (q.trim()) search.set("q", q.trim());
+  search.set("limit", String(limit));
+  const res = await fetch(`/api/v1/${kind}?${search.toString()}`);
+  if (!res.ok) throw await readError(res, "Failed to load options");
+  return res.json();
+}
+
+export async function createTaxonomy(
+  kind: TaxonomyKind,
+  name: string,
+): Promise<TaxonomyItem> {
+  const res = await fetch(`/api/v1/${kind}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+  if (!res.ok) throw await readError(res, "Failed to create option");
   return res.json();
 }

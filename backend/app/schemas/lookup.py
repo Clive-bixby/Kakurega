@@ -16,5 +16,6 @@ class MetadataResponse(BaseModel):
     isbn13: str | None = None
     description: str | None = None
     cover_url: str | None = None
+    pages: int | None = None
     source: str
     confidence: float

@@ -25,7 +25,7 @@ React + TypeScript + Vite.
 |---|---|---|
 | 1 | Foundation and correctness | **Complete** |
 | 2 | Bulk import | **Complete** |
-| 3 | Catalog workflow | Not started |
+| 3 | Catalog workflow | **Complete** |
 | 4 | Reading tracking | Not started |
 | 5 | Tags, notes, filters, dashboard | Not started |
 
@@ -354,9 +354,120 @@ library; suite and build green.
 
 ---
 
-## Phase 3 — Catalog workflow (plan written when phase starts)
+## Phase 3 — Catalog workflow
 
-Source: spec §8.7 and §11 Phase 3.
+**Goal:** a book can be added by typing an ISBN, photographing a barcode, or
+entering it by hand; lookup prefills the form; authors, publishers, genres, and
+tags are chosen from searchable pickers backed by idempotent create-or-get
+endpoints; duplicates are intercepted before a second row exists; Book Details
+edits everything.
+
+**Design:**
+
+- Add `tag_ids` to book create/update/read schemas, repository handling, and
+  validation (invalid tag → 400). `BookRead` and `BookListItem` expose
+  `tag_ids` alongside `author_ids`/`genre_ids`.
+- Add `GET /books/isbn/{isbn}` returning an existing book or 404. It accepts
+  either ISBN form with hyphens/spaces, so the Add Book UI can offer the
+  existing book after lookup. `POST /books` already returns 409 with
+  `detail.book_id`; the UI uses both.
+- Add taxonomy endpoints, all idempotent create-or-get keyed on
+  case-insensitive name:
+  - `GET /authors?q=&limit=` / `POST /authors {name}`
+  - `GET /publishers?q=&limit=` / `POST /publishers {name, country?}`
+  - `GET /genres?q=&limit=` / `POST /genres {name}`
+  - `GET /tags?q=&limit=` / `POST /tags {name}`
+  Return `{id, name}` (publisher also `country`). Tag management/filtering UI
+  remains Phase 5; the endpoint exists now because Book Details edits tags.
+- Frontend gets one reusable `BookForm` and a `TaxonomyPicker`:
+  - pickers debounce a server search, show matches, allow multi-select with
+    removable chips, and offer "Add <name>" when there is no exact match;
+  - prefill from lookup keeps authors as name-only selections and resolves them
+    with create-or-get only on save, so cancelling does not pollute the catalog.
+- Add Book: ISBN input + Lookup, barcode file input with `capture="environment"`
+  calling `/barcode` then `/lookup`, prefilled editable form, and a prominent
+  "Already in library — open it" link when `/books/isbn/{isbn}` or a 409 finds
+  a match.
+- Book Details: display all fields, then edit title/subtitle/ISBNs/pages/
+  language/year/publisher/authors/genres/tags/description/notes/cover; upload
+  or replace the cover; delete stays.
+- No migration.
+
+### Task 1: Tags on books (schemas, repository, routes)
+
+**Files:** `backend/app/schemas/book.py`, `backend/app/repositories/book.py`,
+`backend/app/api/v1/routes/books.py`, `backend/tests/test_books.py`
+
+- `tag_ids` on `BookCreate`/`BookUpdate` (default empty/None), `BookRead` and
+  `BookListItem`.
+- Validate tag ids; attach/detach tags in create/update; eager-load tags.
+- Tests: create with tags, update replaces tags, invalid tag id → 400, list
+  item includes `tag_ids`.
+
+### Task 2: Existing-book lookup by ISBN
+
+**Files:** `backend/app/api/v1/routes/books.py`,
+`backend/app/repositories/book.py`, `backend/tests/test_books.py`
+
+- `GET /books/isbn/{isbn}` — normalize and canonicalize either form, return
+  `BookRead`; 404 for invalid or unknown.
+- Tests: find by ISBN-10, by ISBN-13, with hyphens; unknown/invalid → 404.
+
+### Task 3: Taxonomy endpoints
+
+**Files:** `backend/app/schemas/taxonomy.py` (new),
+`backend/app/repositories/taxonomy.py` (new),
+`backend/app/api/v1/routes/taxonomy.py` (new),
+`backend/app/api/v1/router.py`, `backend/tests/test_taxonomy.py` (new)
+
+- List with `q` (case-insensitive contains) and `limit` (1–500, default 50),
+  ordered by name.
+- Create-or-get: trimmed, non-blank, max length; returns the existing row with
+  the same case-insensitive name (200) or creates it.
+- Publisher create accepts optional `country`.
+- Tests: create then re-create with different case returns the same id; blank
+  name → 422; list filters and orders; publisher country round-trips.
+
+### Task 4: Frontend API client and reusable form
+
+**Files:** `frontend/src/services/api.ts`,
+`frontend/src/components/TaxonomyPicker.tsx` (new),
+`frontend/src/components/BookForm.tsx` (new),
+`frontend/src/pages/AddBookPage.tsx`, `frontend/src/pages/BookDetailsPage.tsx`
+
+- Client: `lookupMetadata`, `decodeBarcode`, `fetchBookByIsbn`,
+  `searchTaxonomy`, `createTaxonomy`, typed `ApiError` carrying `status` and
+  `bookId` (from 409 `detail.book_id`).
+- `TaxonomyPicker`: chips, debounced search, add-on-enter, optional create.
+- `BookForm`: all book fields, publisher single-select, authors/genres/tags
+  multi-select, cover upload/preview, save/cancel, duplicate link.
+- Add Book: ISBN lookup + barcode capture + prefilled form.
+- Book Details: full display and edit; `GET /books/{id}` returns resolved
+  `authors`, `genres`, `tags`, and `publisher` names, so no extra requests are
+  needed to resolve ids.
+
+### Task 5: Documentation and gate
+
+**Files:** `docs/API.md`, `docs/SYSTEM_ARCHITECTURE.md`,
+`docs/superpowers/plans/2026-10-24-phase-1-closeout.md`, `.ai/state.md`
+
+- Document taxonomy endpoints, by-ISBN lookup, `tag_ids`, and the add/edit flow.
+- Tick the gate and mark the status row `Complete`.
+
+**Exit criteria:** from a blank library, a book can be added by ISBN, by barcode
+photo, or manually; its authors/genres/publisher/tags/cover are editable; a
+second attempt with the same ISBN offers the existing book and creates nothing;
+suite and build green.
+
+**Gate:**
+
+- [x] `cd backend && python -m pytest -q` — 88 passed
+- [x] `cd frontend && npm run build` — green
+- [x] No new migration in this phase
+- [x] Docs updated (`API.md`, `SYSTEM_ARCHITECTURE.md`)
+- [x] Status table and `.ai/state.md` updated; phase committed
+
+---
 
 ## Phase 4 — Reading tracking (plan written when phase starts)
 

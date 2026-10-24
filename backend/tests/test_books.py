@@ -161,6 +161,52 @@ def test_update_without_isbn_keeps_isbn(client):
     assert updated["isbn13"] == "9780140328721"
 
 
+def test_create_book_with_tags(client):
+    tag = client.post("/api/v1/tags", json={"name": "sci-fi"}).json()
+
+    created = _create(client, tag_ids=[tag["id"]])
+
+    assert created["tag_ids"] == [tag["id"]]
+    assert created["tags"] == [{"id": tag["id"], "name": "sci-fi"}]
+    listed = client.get("/api/v1/books").json()["items"][0]
+    assert listed["tag_ids"] == [tag["id"]]
+
+
+def test_update_replaces_tags(client):
+    first = client.post("/api/v1/tags", json={"name": "first"}).json()
+    second = client.post("/api/v1/tags", json={"name": "second"}).json()
+    created = _create(client, tag_ids=[first["id"]])
+
+    replaced = client.put(
+        f"/api/v1/books/{created['id']}", json={"tag_ids": [second["id"]]}
+    ).json()
+    assert replaced["tag_ids"] == [second["id"]]
+
+    cleared = client.put(
+        f"/api/v1/books/{created['id']}", json={"tag_ids": []}
+    ).json()
+    assert cleared["tag_ids"] == []
+
+
+def test_invalid_tag_id_is_rejected(client):
+    response = client.post(
+        "/api/v1/books", json={"title": "Bad Tag", "tag_ids": [999]}
+    )
+    assert response.status_code == 400
+
+
+def test_find_book_by_isbn_in_any_form(client):
+    created = _create(client, isbn10="0140328726")
+
+    for value in ("0140328726", "0-14-032872-6", "9780140328721", "978-0-14-032872-1"):
+        response = client.get(f"/api/v1/books/isbn/{value}")
+        assert response.status_code == 200
+        assert response.json()["id"] == created["id"]
+
+    assert client.get("/api/v1/books/isbn/9780140328722").status_code == 404
+    assert client.get("/api/v1/books/isbn/not-an-isbn").status_code == 404
+
+
 def test_update_book(client):
     created = _create(client)
     response = client.put(f"/api/v1/books/{created['id']}", json={"title": "New"})

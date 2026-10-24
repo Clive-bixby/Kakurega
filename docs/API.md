@@ -74,6 +74,7 @@ Response:
       "publisher_id": null,
       "author_ids": [],
       "genre_ids": [],
+      "tag_ids": [],
       "created_at": "2026-10-24T10:00:00Z"
     }
   ],
@@ -83,13 +84,38 @@ Response:
 }
 ```
 
-List items omit `description` and `notes`; fetch `GET /books/{id}` for those.
+List items omit `description`, `notes`, and the resolved `authors`, `genres`,
+`tags`, and `publisher` objects; fetch `GET /books/{id}` for those.
 
 ------------------------------------------------------------------------
 
 ## GET /books/{id}
 
-Returns complete details for a single book.
+Returns complete details for a single book, including resolved names:
+
+```json
+{
+  "id": 1,
+  "title": "Example",
+  "authors": [{"id": 1, "name": "Author Name"}],
+  "genres": [{"id": 1, "name": "Fantasy"}],
+  "tags": [{"id": 1, "name": "sci-fi"}],
+  "publisher": {"id": 1, "name": "Publisher", "country": null},
+  "author_ids": [1],
+  "genre_ids": [1],
+  "tag_ids": [1],
+  "publisher_id": 1
+}
+```
+
+------------------------------------------------------------------------
+
+## GET /books/isbn/{isbn}
+
+Looks up an existing book by either ISBN form, with or without hyphens or
+spaces. Returns the full book object, or 404 when the ISBN is invalid or not in
+the library. The Add Book screen uses this to offer the existing book instead of
+creating a duplicate.
 
 ------------------------------------------------------------------------
 
@@ -106,6 +132,7 @@ Request body:
   "isbn10": null,
   "isbn13": null,
   "description": null,
+  "notes": null,
   "pages": null,
   "language": null,
   "published_year": null,
@@ -114,7 +141,8 @@ Request body:
   "openlibrary_id": null,
   "publisher_id": 1,
   "author_ids": [1],
-  "genre_ids": [1]
+  "genre_ids": [1],
+  "tag_ids": [1]
 }
 ```
 
@@ -127,7 +155,7 @@ Validation rules:
 - ISBNs are normalised (hyphens/spaces removed, `x` uppercased) and must pass
   checksum validation. An ISBN-10 is converted and stored alongside its derived
   ISBN-13; both forms identify the same book.
-- Invalid `publisher_id`, `author_ids`, or `genre_ids` return 400.
+- Invalid `publisher_id`, `author_ids`, `genre_ids`, or `tag_ids` return 400.
 - A book with an existing ISBN (either form) returns 409 with
   `detail.book_id`.
 
@@ -235,6 +263,7 @@ Response:
   "isbn13": "9780140328721",
   "description": "Description",
   "cover_url": "https://example.com/cover.jpg",
+  "pages": 320,
   "source": "open_library",
   "confidence": 0.9
 }
@@ -249,49 +278,55 @@ Returns 404 when no match is found and 502 when both upstreams fail.
 `GET /search` has been removed. Search is part of `GET /books` (`?q=...`), so
 results are paginated and filterable in one request.
 
-Searches books by title, ISBN, and description.
+------------------------------------------------------------------------
 
-Query parameter:
+# 6. Taxonomy
 
-- `q`
+Authors, publishers, genres, and tags share one create-or-get API surface.
+Names are trimmed and unique case-insensitively: posting an existing name in a
+different case returns the existing row instead of creating a duplicate.
 
-Returns a list of matching books.
+## GET /authors, GET /publishers, GET /genres, GET /tags
+
+Query parameters:
+
+| Name | Type | Default | Notes |
+|---|---|---|---|
+| `q` | string | | Case-insensitive substring match on name; `%`, `_`, and `\` are literal |
+| `limit` | int | 50 | 1–500 |
+
+Results are ordered by name (case-insensitive). Response:
+
+```json
+[
+  {"id": 1, "name": "Ursula K. Le Guin"}
+]
+```
+
+Publisher items also include `country`:
+
+```json
+[{"id": 1, "name": "Ace", "country": "US"}]
+```
+
+## POST /authors, POST /publishers, POST /genres, POST /tags
+
+Request body:
+
+```json
+{"name": "Ursula K. Le Guin"}
+```
+
+Publishers additionally accept an optional `country`. Names are required, are
+trimmed, and cannot be blank (422). Returns the existing or newly created
+entity with 200.
+
+Tag management (rename/delete) is planned for the dashboard phase; the list and
+create endpoints above already support the book editor.
 
 ------------------------------------------------------------------------
 
-# 6. Tags
-
-## GET /tags
-
-## POST /tags
-
-## PUT /tags/{id}
-
-## DELETE /tags/{id}
-
-------------------------------------------------------------------------
-
-# 7. Authors
-
-## GET /authors
-
-## GET /authors/{id}
-
-------------------------------------------------------------------------
-
-# 8. Publishers
-
-## GET /publishers
-
-------------------------------------------------------------------------
-
-# 9. Genres
-
-## GET /genres
-
-------------------------------------------------------------------------
-
-# 10. Insights
+# 7. Insights
 
 ## GET /insights
 
@@ -302,7 +337,7 @@ Returns dashboard statistics:
 
 ------------------------------------------------------------------------
 
-# 11. Import / Export
+# 8. Import / Export
 
 ## POST /import/csv
 
@@ -364,7 +399,7 @@ Not implemented yet. Planned for CSV and JSON.
 
 ------------------------------------------------------------------------
 
-# 12. Settings
+# 9. Settings
 
 ## GET /settings
 
@@ -379,7 +414,7 @@ Examples:
 
 ------------------------------------------------------------------------
 
-# 13. Status Codes
+# 10. Status Codes
 
 -   200 OK
 -   201 Created
@@ -393,7 +428,7 @@ Examples:
 
 ------------------------------------------------------------------------
 
-# 14. Future Endpoints
+# 11. Future Endpoints
 
 Authentication
 
@@ -417,7 +452,7 @@ Users
 
 ------------------------------------------------------------------------
 
-# 15. API Principles
+# 12. API Principles
 
 -   RESTful naming
 -   Consistent JSON responses

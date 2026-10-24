@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
 from app.core.errors import DuplicateBookError, InvalidReferenceError
+from app.core.isbn import canonicalize_isbns, normalize_isbn
 from app.repositories.book import BookFilters
 from app.schemas.book import BookCreate, BookPage, BookRead, BookUpdate
 from app.services.book import BookService
@@ -31,6 +32,14 @@ def list_books(
     )
     items, total = BookService(db).list_books(filters, limit, offset, sort)
     return BookPage(items=items, total=total, limit=limit, offset=offset)
+
+
+@router.get("/isbn/{isbn}", response_model=BookRead)
+def get_book_by_isbn(isbn: str, db: Session = Depends(get_db)):
+    book = BookService(db).get_book_by_isbn(isbn)
+    if book is None:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return book
 
 
 @router.get("/{book_id}", response_model=BookRead)

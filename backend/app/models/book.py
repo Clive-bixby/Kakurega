@@ -60,3 +60,7 @@ class Book(Base):
     @property
     def genre_ids(self) -> list[int]:
         return [genre.id for genre in self.genres]
+
+    @property
+    def tag_ids(self) -> list[int]:
+        return [tag.id for tag in self.tags]

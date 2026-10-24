@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.core.isbn import canonicalize_isbns
+from app.schemas.taxonomy import NamedEntityRead, PublisherRead
 
 
 class BookCreate(BaseModel):
@@ -21,6 +22,7 @@ class BookCreate(BaseModel):
     publisher_id: int | None = None
     author_ids: list[int] = Field(default_factory=list)
     genre_ids: list[int] = Field(default_factory=list)
+    tag_ids: list[int] = Field(default_factory=list)
 
     @field_validator("title", "subtitle", "language", mode="before")
     @classmethod
@@ -61,6 +63,7 @@ class BookUpdate(BaseModel):
     publisher_id: int | None = None
     author_ids: list[int] | None = None
     genre_ids: list[int] | None = None
+    tag_ids: list[int] | None = None
 
     @field_validator("title", "subtitle", "language", mode="before")
     @classmethod
@@ -97,6 +100,10 @@ class BookUpdate(BaseModel):
 class BookRead(BookCreate):
     id: int
     created_at: datetime
+    authors: list[NamedEntityRead] = Field(default_factory=list)
+    genres: list[NamedEntityRead] = Field(default_factory=list)
+    tags: list[NamedEntityRead] = Field(default_factory=list)
+    publisher: PublisherRead | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -115,6 +122,7 @@ class BookListItem(BaseModel):
     created_at: datetime
     author_ids: list[int]
     genre_ids: list[int]
+    tag_ids: list[int]
 
     model_config = ConfigDict(from_attributes=True)
 

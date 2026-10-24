@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from app.core.isbn import canonicalize_isbns, normalize_isbn
 from app.models.book import Book
 from app.repositories.book import BookFilters, BookRepository
 from app.schemas.book import BookCreate, BookUpdate
@@ -20,6 +21,22 @@ class BookService:
 
     def get_book(self, book_id: int) -> Book | None:
         return self.repo.get(book_id)
+
+    def get_book_by_isbn(self, isbn: str) -> Book | None:
+        cleaned = normalize_isbn(isbn)
+        if cleaned is None:
+            return None
+        try:
+            if len(cleaned) == 10:
+                isbn10, isbn13 = canonicalize_isbns(cleaned, None)
+            else:
+                isbn10, isbn13 = canonicalize_isbns(None, cleaned)
+        except ValueError:
+            return None
+        book = self.repo.find_by_isbn(isbn10, isbn13)
+        if book is None:
+            return None
+        return self.repo.get(book.id)
 
     def create_book(self, data: BookCreate) -> Book:
         return self.repo.create(data)
