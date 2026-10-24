@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { X } from "lucide-react";
 
 import { READING_STATUS_OPTIONS } from "../components/StatusBadge";
 import { useBooks } from "../hooks/useBooks";
+import { BookCover } from "../shared/BookCover";
 import { EmptyState } from "../shared/EmptyState";
 import { PageHeader } from "../shared/PageHeader";
 import {
@@ -15,7 +17,7 @@ import {
   TaxonomyItem,
 } from "../services/api";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 24;
 const NEXT_YEAR = new Date().getFullYear() + 1;
 
 function parseYear(value: string): number | undefined {
@@ -24,13 +26,14 @@ function parseYear(value: string): number | undefined {
 }
 
 export function LibraryPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlQuery = (searchParams.get("q") ?? "").trim();
+
   const [offset, setOffset] = useState(0);
   const [members, setMembers] = useState<Member[]>([]);
   const [genres, setGenres] = useState<TaxonomyItem[]>([]);
   const [tags, setTags] = useState<TagSummary[]>([]);
 
-  const [searchInput, setSearchInput] = useState("");
-  const [query, setQuery] = useState("");
   const [genreId, setGenreId] = useState("");
   const [tagName, setTagName] = useState("");
   const [yearFrom, setYearFrom] = useState("");
@@ -40,13 +43,8 @@ export function LibraryPage() {
   const [sort, setSort] = useState<"title" | "added" | "year">("title");
 
   useEffect(() => {
-    const handle = window.setTimeout(() => setQuery(searchInput.trim()), 300);
-    return () => window.clearTimeout(handle);
-  }, [searchInput]);
-
-  useEffect(() => {
     setOffset(0);
-  }, [query, genreId, tagName, yearFrom, yearTo, memberId, status, sort]);
+  }, [urlQuery, genreId, tagName, yearFrom, yearTo, memberId, status, sort]);
 
   useEffect(() => {
     Promise.all([
@@ -69,7 +67,7 @@ export function LibraryPage() {
   const { books, total, loading, error } = useBooks({
     limit: PAGE_SIZE,
     offset,
-    q: query || undefined,
+    q: urlQuery || undefined,
     genre_id: genreId ? Number(genreId) : undefined,
     tag: tagName || undefined,
     year_from: parseYear(yearFrom),
@@ -89,7 +87,6 @@ export function LibraryPage() {
   const canGoBack = offset > 0;
   const canGoForward = offset + PAGE_SIZE < total;
   const filtered =
-    query !== "" ||
     genreId !== "" ||
     tagName !== "" ||
     yearFrom !== "" ||
@@ -99,8 +96,6 @@ export function LibraryPage() {
     sort !== "title";
 
   function clearFilters() {
-    setSearchInput("");
-    setQuery("");
     setGenreId("");
     setTagName("");
     setYearFrom("");
@@ -108,23 +103,38 @@ export function LibraryPage() {
     setMemberId("");
     setStatus("");
     setSort("title");
+    if (urlQuery) setSearchParams({});
   }
 
   return (
     <div>
-      <PageHeader title="Library" />
+      <PageHeader
+        title="Library"
+        description={
+          loading && total === 0
+            ? "Loading your collection..."
+            : `${total} ${total === 1 ? "book" : "books"} in your collection`
+        }
+        actions={
+          <label className="sort-control">
+            <span className="sr-only">Sort books</span>
+            <select
+              aria-label="Sort books"
+              value={sort}
+              onChange={(event) =>
+                setSort(event.target.value as "title" | "added" | "year")
+              }
+            >
+              <option value="title">Sort: Title</option>
+              <option value="added">Sort: Recently added</option>
+              <option value="year">Sort: Publication year</option>
+            </select>
+          </label>
+        }
+      />
 
       <section className="panel filter-panel" aria-label="Library filters">
         <div className="filter-grid">
-          <label className="filter-search">
-            Search
-            <input
-              type="search"
-              value={searchInput}
-              placeholder="Title, author, ISBN..."
-              onChange={(event) => setSearchInput(event.target.value)}
-            />
-          </label>
           <label>
             Genre
             <select
@@ -203,19 +213,6 @@ export function LibraryPage() {
               onChange={(event) => setYearTo(event.target.value)}
             />
           </label>
-          <label>
-            Sort by
-            <select
-              value={sort}
-              onChange={(event) =>
-                setSort(event.target.value as "title" | "added" | "year")
-              }
-            >
-              <option value="title">Title</option>
-              <option value="added">Recently added</option>
-              <option value="year">Publication year</option>
-            </select>
-          </label>
         </div>
 
         <div className="filter-actions">
@@ -229,7 +226,7 @@ export function LibraryPage() {
             <button
               type="button"
               onClick={clearFilters}
-              disabled={!filtered}
+              disabled={!filtered && !urlQuery}
             >
               Clear filters
             </button>
@@ -237,15 +234,34 @@ export function LibraryPage() {
         </div>
       </section>
 
-      {loading && <p>Loading...</p>}
+      {urlQuery && (
+        <div className="query-chip-row">
+          <span className="chip chip-accent">
+            “{urlQuery}”
+            <button
+              type="button"
+              onClick={() => setSearchParams({})}
+              aria-label={`Clear search for ${urlQuery}`}
+            >
+              <X size={12} aria-hidden="true" />
+            </button>
+          </span>
+        </div>
+      )}
+
+      {loading && <p className="muted">Loading books...</p>}
       {error && <p role="alert">{error}</p>}
 
       {!loading && !error && books.length === 0 && (
         <EmptyState
-          title={filtered ? "No books match these filters" : "Your library is empty"}
+          title={
+            filtered || urlQuery
+              ? "No books match these filters"
+              : "Your library is empty"
+          }
         >
-          {filtered ? (
-            "Try a different combination or clear the filters."
+          {filtered || urlQuery ? (
+            "Try a different combination, or clear the filters."
           ) : (
             <>
               Add a book by ISBN or <Link to="/import">import a shelf</Link>.
@@ -254,35 +270,29 @@ export function LibraryPage() {
         </EmptyState>
       )}
 
-      <ul className="book-list">
-        {books.map((book) => (
-          <li key={book.id} className="book-list-item">
-            {book.cover_url ? (
-              <img
-                className="book-list-cover"
-                src={book.cover_url}
-                alt=""
-                loading="lazy"
-              />
-            ) : (
-              <div className="book-list-cover book-list-cover-empty" aria-hidden="true" />
-            )}
-            <div className="book-list-body">
-              <Link to={`/library/${book.id}`} className="book-list-title">
-                {book.title}
+      {books.length > 0 && (
+        <ul className="book-grid">
+          {books.map((book) => (
+            <li key={book.id} className="book-card">
+              <Link to={`/library/${book.id}`} className="book-card-link">
+                <BookCover
+                  title={book.title}
+                  coverUrl={book.cover_url}
+                  decorative
+                />
+                <div>
+                  <h2 className="book-card-title">{book.title}</h2>
+                  <p className="book-card-meta">
+                    {book.author_names.length > 0
+                      ? book.author_names.join(", ")
+                      : "Unknown author"}
+                    {book.published_year ? ` · ${book.published_year}` : ""}
+                  </p>
+                </div>
               </Link>
-              <p className="book-list-meta">
-                {[
-                  book.published_year,
-                  book.language,
-                  book.pages ? `${book.pages} pages` : null,
-                ]
-                  .filter(Boolean)
-                  .join(" · ") || "No details yet"}
-              </p>
               {book.tag_ids.length > 0 && (
-                <ul className="chips book-list-tags">
-                  {book.tag_ids.map((tagId) => {
+                <ul className="chips book-card-tags" aria-label="Tags">
+                  {book.tag_ids.slice(0, 3).map((tagId) => {
                     const name = tagNames.get(tagId);
                     return name ? (
                       <li key={tagId} className="chip">
@@ -290,29 +300,39 @@ export function LibraryPage() {
                       </li>
                     ) : null;
                   })}
+                  {book.tag_ids.length > 3 && (
+                    <li className="chip">+{book.tag_ids.length - 3}</li>
+                  )}
                 </ul>
               )}
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
 
-      <div className="pager">
-        <button
-          type="button"
-          disabled={!canGoBack || loading}
-          onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
-        >
-          Previous
-        </button>
-        <button
-          type="button"
-          disabled={!canGoForward || loading}
-          onClick={() => setOffset(offset + PAGE_SIZE)}
-        >
-          Next
-        </button>
-      </div>
+      {total > PAGE_SIZE && (
+        <nav className="pager" aria-label="Library pages">
+          <span className="muted tabular">
+            {from}–{to} of {total}
+          </span>
+          <div className="pager-actions">
+            <button
+              type="button"
+              disabled={!canGoBack || loading}
+              onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              disabled={!canGoForward || loading}
+              onClick={() => setOffset(offset + PAGE_SIZE)}
+            >
+              Next
+            </button>
+          </div>
+        </nav>
+      )}
     </div>
   );
 }

@@ -87,11 +87,11 @@ export function TagsPage() {
 
   return (
     <div>
-      <PageHeader title="Tags" />
-      <p className="page-intro">
-        Tags are shared across the household. Renaming a tag updates every book
-        that uses it.
-      </p>
+      <PageHeader
+        eyebrow="Organise"
+        title="Tags"
+        description="Tags are shared across the household. Renaming a tag updates every book that uses it."
+      />
 
       {error && (
         <p className="form-message" role="alert">
@@ -108,17 +108,17 @@ export function TagsPage() {
         </div>
 
         {loading ? (
-          <p>Loading tags...</p>
+          <p className="muted">Loading tags...</p>
         ) : tags.length === 0 ? (
           <EmptyState title="No tags yet">
             Add tags here, or create them while editing a book.
           </EmptyState>
         ) : (
-          <ul className="tag-manager-list">
+          <ul className="tag-grid">
             {tags.map((tag) => (
-              <li key={tag.id} className="tag-manager-row">
+              <li key={tag.id} className="tag-card">
                 {editing?.id === tag.id ? (
-                  <form className="tag-manager-edit" onSubmit={handleRename}>
+                  <form className="tag-edit" onSubmit={handleRename}>
                     <label className="sr-only" htmlFor="tag-name">
                       Tag name
                     </label>
@@ -148,14 +148,14 @@ export function TagsPage() {
                   </form>
                 ) : (
                   <>
-                    <div className="tag-manager-name">
-                      <span>{tag.name}</span>
-                      <span className="muted tabular">
+                    <div className="tag-card-head">
+                      <span className="tag-card-name">{tag.name}</span>
+                      <span className="tag-count">
                         {tag.book_count}{" "}
                         {tag.book_count === 1 ? "book" : "books"}
                       </span>
                     </div>
-                    <div className="tag-manager-actions">
+                    <div className="tag-card-actions">
                       <button
                         type="button"
                         onClick={() =>
@@ -167,6 +167,7 @@ export function TagsPage() {
                       </button>
                       <button
                         type="button"
+                        className="ghost"
                         onClick={() => handleDelete(tag)}
                         disabled={busy}
                       >
@@ -180,9 +181,9 @@ export function TagsPage() {
           </ul>
         )}
 
-        <form className="tag-manager-add" onSubmit={handleCreate}>
-          <label htmlFor="new-tag">New tag</label>
-          <div className="tag-manager-add-row">
+        <form className="tag-add" onSubmit={handleCreate}>
+          <label htmlFor="new-tag">
+            New tag
             <input
               id="new-tag"
               value={newTag}
@@ -190,14 +191,14 @@ export function TagsPage() {
               placeholder="e.g. Signed"
               autoComplete="off"
             />
-            <button
-              type="submit"
-              className="primary"
-              disabled={busy || !newTag.trim()}
-            >
-              Add tag
-            </button>
-          </div>
+          </label>
+          <button
+            type="submit"
+            className="primary"
+            disabled={busy || !newTag.trim()}
+          >
+            Add tag
+          </button>
         </form>
       </section>
     </div>

@@ -1,3 +1,4 @@
+import { Camera, PenLine, ScanBarcode } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -119,70 +120,121 @@ export function AddBookPage() {
 
   return (
     <div>
-      <PageHeader title="Add Book" />
-      <p>
-        Type an ISBN and look it up, photograph the barcode, or enter the book
-        by hand. Every prefilled field stays editable.
-      </p>
+      <PageHeader
+        eyebrow="Library"
+        title="Add a book"
+        description="Look the book up by ISBN, scan its barcode, or enter the details yourself. Every prefilled field stays editable."
+      />
 
-      <form
-        className="lookup-form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          void lookup(isbn);
-        }}
-      >
-        <label>
-          ISBN
-          <input
-            value={isbn}
-            onChange={(e) => setIsbn(e.target.value)}
-            placeholder="9780140328721"
-            aria-label="ISBN"
-          />
-        </label>
-        <button type="submit" disabled={looking || !isbn.trim()}>
-          {looking ? "Looking up..." : "Look up"}
-        </button>
-        <label>
-          Barcode photo
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            capture="environment"
-            onChange={handleBarcode}
-            aria-label="Barcode photo"
-          />
-        </label>
-        <button
-          type="button"
-          onClick={() => {
-            setExistingId(null);
-            setNotice(null);
-            showForm(manualInitial(isbn));
-          }}
-        >
-          Enter manually
-        </button>
-      </form>
-
-      {notice && <p role="status">{notice}</p>}
-      {error && <p role="alert">{error}</p>}
-
+      {notice && (
+        <p className="form-message" role="status">
+          {notice}
+        </p>
+      )}
+      {error && (
+        <p className="form-message" role="alert">
+          {error}
+        </p>
+      )}
       {existingId && (
-        <p role="status">
+        <p className="form-message" role="status">
           This ISBN is already in your library.{" "}
           <Link to={`/library/${existingId}`}>Open the existing book</Link>.
         </p>
       )}
 
+      <div className="add-grid">
+        <section className="add-card" aria-labelledby="lookup-heading">
+          <span className="add-card-icon" aria-hidden="true">
+            <ScanBarcode size={22} />
+          </span>
+          <h2 id="lookup-heading">Look up an ISBN</h2>
+          <p>
+            Type the ISBN and we will fetch the title, author, cover, and page
+            count from the metadata services.
+          </p>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              void lookup(isbn);
+            }}
+          >
+            <input
+              value={isbn}
+              onChange={(e) => setIsbn(e.target.value)}
+              placeholder="9780140328721"
+              aria-label="ISBN"
+            />
+            <button
+              type="submit"
+              className="primary"
+              disabled={looking || !isbn.trim()}
+            >
+              {looking ? "Looking..." : "Look up"}
+            </button>
+          </form>
+        </section>
+
+        <section className="add-card" aria-labelledby="scan-heading">
+          <span className="add-card-icon" aria-hidden="true">
+            <Camera size={22} />
+          </span>
+          <h2 id="scan-heading">Scan the barcode</h2>
+          <p>
+            Photograph the barcode on the back of the book and let the scanner
+            read the ISBN for you.
+          </p>
+          <label className="file-drop">
+            <Camera size={18} aria-hidden="true" />
+            <span>
+              {looking ? "Reading barcode..." : "Upload a barcode photo"}
+            </span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              capture="environment"
+              onChange={handleBarcode}
+              aria-label="Barcode photo"
+            />
+          </label>
+        </section>
+
+        <section className="add-card" aria-labelledby="manual-heading">
+          <span className="add-card-icon" aria-hidden="true">
+            <PenLine size={22} />
+          </span>
+          <h2 id="manual-heading">Enter it manually</h2>
+          <p>
+            Best for rare, uncatalogued, or self-published editions. Fill in as
+            much or as little as you like.
+          </p>
+          <button
+            type="button"
+            className="primary"
+            onClick={() => {
+              setExistingId(null);
+              setNotice(null);
+              showForm(manualInitial(isbn));
+            }}
+          >
+            Start a blank entry
+          </button>
+        </section>
+      </div>
+
       {initial && !existingId && (
-        <BookForm
-          key={formKey}
-          initial={initial}
-          submitLabel="Add book"
-          onSubmit={handleCreate}
-        />
+        <section className="panel" aria-labelledby="details-heading">
+          <div className="panel-header">
+            <h2 id="details-heading">Book details</h2>
+            <span className="muted">Verify the metadata before saving</span>
+          </div>
+          <BookForm
+            key={formKey}
+            initial={initial}
+            submitLabel="Add book"
+            onSubmit={handleCreate}
+          />
+        </section>
       )}
     </div>
   );

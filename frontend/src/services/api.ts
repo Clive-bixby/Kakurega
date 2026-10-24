@@ -26,7 +26,9 @@ export type Book = {
 export type BookListItem = Omit<
   Book,
   "description" | "notes" | "publisher" | "authors" | "genres" | "tags"
->;
+> & {
+  author_names: string[];
+};
 
 export type BookPage = {
   items: BookListItem[];
@@ -114,6 +116,8 @@ export type Insights = {
   currently_reading: {
     book_id: number;
     book_title: string;
+    cover_url: string | null;
+    author_name: string | null;
     member_id: number;
     member_name: string;
     current_page: number | null;
@@ -123,6 +127,7 @@ export type Insights = {
     book_id: number;
     title: string;
     cover_url: string | null;
+    author_name: string | null;
     created_at: string;
   }[];
 };

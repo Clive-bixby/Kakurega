@@ -7,6 +7,7 @@ import {
   createTaxonomy,
   uploadImage,
 } from "../services/api";
+import { BookCover } from "../shared/BookCover";
 import { SelectedOption, TaxonomyPicker } from "./TaxonomyPicker";
 
 export type BookFormInitial = {
@@ -224,13 +225,12 @@ export function BookForm({ initial, submitLabel, onSubmit, onCancel }: Props) {
       <div className="form-field form-field-wide">
         <span className="field-label">Cover image</span>
         <div className="cover-row">
-          {coverUrl ? (
-            <img className="cover-preview" src={coverUrl} alt="Cover preview" />
-          ) : (
-            <div className="cover-preview cover-preview-empty" aria-hidden="true">
-              No cover
-            </div>
-          )}
+          <BookCover
+            title={title.trim() || "Untitled"}
+            coverUrl={coverUrl}
+            className="cover-preview"
+            decorative
+          />
           <div className="cover-actions">
             <input
               type="file"

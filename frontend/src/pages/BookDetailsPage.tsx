@@ -1,8 +1,10 @@
+import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { BookForm, BookFormInitial } from "../components/BookForm";
 import { ReadingPanel } from "../components/ReadingPanel";
+import { BookCover } from "../shared/BookCover";
 import { PageHeader } from "../shared/PageHeader";
 import { formatDate } from "../shared/format";
 import { Book, BookInput, deleteBook, fetchBook, updateBook } from "../services/api";
@@ -66,8 +68,11 @@ export function BookDetailsPage() {
   if (loading) {
     return (
       <div>
-        <PageHeader title="Book Details" />
-        <p>Loading...</p>
+        <Link to="/library" className="detail-back">
+          <ArrowLeft size={16} aria-hidden="true" />
+          Library
+        </Link>
+        <p className="muted">Loading book...</p>
       </div>
     );
   }
@@ -75,60 +80,125 @@ export function BookDetailsPage() {
   if (!book) {
     return (
       <div>
-        <PageHeader title="Book Details" />
-        <p role="alert">{error ?? "Book not found"}</p>
-        <Link to="/library">Back to library</Link>
+        <Link to="/library" className="detail-back">
+          <ArrowLeft size={16} aria-hidden="true" />
+          Library
+        </Link>
+        <PageHeader title="Book not found" />
+        <p role="alert">{error ?? "This book is no longer in your library."}</p>
+      </div>
+    );
+  }
+
+  if (editing) {
+    return (
+      <div>
+        <Link to={`/library/${book.id}`} className="detail-back">
+          <ArrowLeft size={16} aria-hidden="true" />
+          Back to book
+        </Link>
+        <PageHeader
+          eyebrow="Library"
+          title="Edit book"
+          description="Update the metadata, covers, and taxonomy for this entry."
+        />
+        {error && <p role="alert">{error}</p>}
+        <div className="panel">
+          <BookForm
+            initial={initialFromBook(book)}
+            submitLabel="Save changes"
+            onSubmit={handleSave}
+            onCancel={() => {
+              setEditing(false);
+              setError(null);
+            }}
+          />
+        </div>
       </div>
     );
   }
 
   return (
     <div>
-      <PageHeader title={editing ? "Edit Book" : book.title} />
+      <Link to="/library" className="detail-back">
+        <ArrowLeft size={16} aria-hidden="true" />
+        Library
+      </Link>
 
       {error && <p role="alert">{error}</p>}
 
-      {editing ? (
-        <BookForm
-          initial={initialFromBook(book)}
-          submitLabel="Save changes"
-          onSubmit={handleSave}
-          onCancel={() => {
-            setEditing(false);
-            setError(null);
-          }}
-        />
-      ) : (
-        <div className="book-detail">
-          <div className="book-detail-cover">
-            {book.cover_url ? (
-              <img src={book.cover_url} alt={`Cover of ${book.title}`} />
-            ) : (
-              <div className="cover-preview cover-preview-empty">No cover</div>
-            )}
+      <div className="detail-layout">
+        <aside className="detail-rail">
+          <BookCover
+            title={book.title}
+            coverUrl={book.cover_url}
+            className="detail-cover"
+          />
+          <div className="detail-rail-actions">
+            <button
+              type="button"
+              className="primary"
+              onClick={() => setEditing(true)}
+            >
+              Edit book
+            </button>
+            <button type="button" className="danger" onClick={handleDelete}>
+              Delete
+            </button>
+          </div>
+        </aside>
+
+        <div className="detail-body">
+          <p className="detail-eyebrow">
+            {book.genres.length > 0
+              ? book.genres.map((genre) => genre.name).join(" · ")
+              : "From your library"}
+          </p>
+          <h1 className="detail-title">{book.title}</h1>
+          {book.subtitle && <p className="detail-subtitle">{book.subtitle}</p>}
+          <p className="detail-author">
+            by{" "}
+            {book.authors.length > 0
+              ? book.authors.map((author) => author.name).join(", ")
+              : "Unknown author"}
+          </p>
+
+          <div className="detail-meta">
+            <div className="meta-card">
+              <span className="meta-label">Published</span>
+              <span className="meta-value tabular">
+                {book.published_year ?? "—"}
+              </span>
+            </div>
+            <div className="meta-card">
+              <span className="meta-label">Pages</span>
+              <span className="meta-value tabular">{book.pages ?? "—"}</span>
+            </div>
+            <div className="meta-card">
+              <span className="meta-label">Language</span>
+              <span className="meta-value">{book.language ?? "—"}</span>
+            </div>
+            <div className="meta-card">
+              <span className="meta-label">Publisher</span>
+              <span className="meta-value">
+                {book.publisher?.name ?? "—"}
+              </span>
+            </div>
+            <div className="meta-card">
+              <span className="meta-label">ISBN-10</span>
+              <span className="meta-value tabular">{book.isbn10 ?? "—"}</span>
+            </div>
+            <div className="meta-card">
+              <span className="meta-label">ISBN-13</span>
+              <span className="meta-value tabular">{book.isbn13 ?? "—"}</span>
+            </div>
           </div>
 
-          <div className="book-detail-body">
-            {book.subtitle && <p className="book-subtitle">{book.subtitle}</p>}
-
-            <dl className="detail-list">
-              <dt>Authors</dt>
-              <dd>{book.authors.map((a) => a.name).join(", ") || "—"}</dd>
-              <dt>Publisher</dt>
-              <dd>{book.publisher?.name ?? "—"}</dd>
-              <dt>Published</dt>
-              <dd>{book.published_year ?? "—"}</dd>
-              <dt>Pages</dt>
-              <dd>{book.pages ?? "—"}</dd>
-              <dt>Language</dt>
-              <dd>{book.language ?? "—"}</dd>
-              <dt>ISBN-10</dt>
-              <dd>{book.isbn10 ?? "—"}</dd>
-              <dt>ISBN-13</dt>
-              <dd>{book.isbn13 ?? "—"}</dd>
-              <dt>Genres</dt>
-              <dd>
-                {book.genres.length > 0 ? (
+          {(book.genres.length > 0 || book.tags.length > 0) && (
+            <div className="detail-tags">
+              {book.genres.length > 0 && (
+                <div className="detail-tag-group">
+                  <span className="detail-tag-label">Genres</span>
                   <ul className="chips">
                     {book.genres.map((genre) => (
                       <li key={genre.id} className="chip">
@@ -136,13 +206,11 @@ export function BookDetailsPage() {
                       </li>
                     ))}
                   </ul>
-                ) : (
-                  "—"
-                )}
-              </dd>
-              <dt>Tags</dt>
-              <dd>
-                {book.tags.length > 0 ? (
+                </div>
+              )}
+              {book.tags.length > 0 && (
+                <div className="detail-tag-group">
+                  <span className="detail-tag-label">Tags</span>
                   <ul className="chips">
                     {book.tags.map((tag) => (
                       <li key={tag.id} className="chip">
@@ -150,42 +218,41 @@ export function BookDetailsPage() {
                       </li>
                     ))}
                   </ul>
-                ) : (
-                  "—"
-                )}
-              </dd>
-              <dt>Added</dt>
-              <dd>{formatDate(book.created_at)}</dd>
-            </dl>
-
-            {book.description && (
-              <section>
-                <h3>Description</h3>
-                <p className="prose">{book.description}</p>
-              </section>
-            )}
-
-            {book.notes && (
-              <section>
-                <h3>Notes</h3>
-                <p className="prose">{book.notes}</p>
-              </section>
-            )}
-
-            <ReadingPanel bookId={book.id} bookPages={book.pages} />
-
-            <div className="form-actions">
-              <button type="button" className="primary" onClick={() => setEditing(true)}>
-                Edit
-              </button>
-              <button type="button" onClick={handleDelete}>
-                Delete
-              </button>
-              <Link to="/library">Back to library</Link>
+                </div>
+              )}
             </div>
-          </div>
+          )}
+
+          <section className="detail-section">
+            <h2>Synopsis</h2>
+            {book.description ? (
+              <p className="prose">{book.description}</p>
+            ) : (
+              <p className="muted">
+                No synopsis yet. Use “Edit book” to add one.
+              </p>
+            )}
+          </section>
+
+          <section className="detail-section">
+            <h2>Reading notes</h2>
+            {book.notes ? (
+              <p className="prose">{book.notes}</p>
+            ) : (
+              <p className="muted">
+                Nothing noted yet. Use “Edit book” to keep your own notes.
+              </p>
+            )}
+          </section>
+
+          <section className="detail-section">
+            <h2>Catalogued</h2>
+            <p className="muted">Added to the library {formatDate(book.created_at)}.</p>
+          </section>
+
+          <ReadingPanel bookId={book.id} bookPages={book.pages} />
         </div>
-      )}
+      </div>
     </div>
   );
 }
