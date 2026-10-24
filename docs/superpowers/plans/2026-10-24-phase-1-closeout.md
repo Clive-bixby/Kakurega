@@ -26,7 +26,7 @@ React + TypeScript + Vite.
 | 1 | Foundation and correctness | **Complete** |
 | 2 | Bulk import | **Complete** |
 | 3 | Catalog workflow | **Complete** |
-| 4 | Reading tracking | Not started |
+| 4 | Reading tracking | **Complete** |
 | 5 | Tags, notes, filters, dashboard | Not started |
 
 **Gate (run at the end of every phase, tick before moving on):**
@@ -469,9 +469,135 @@ suite and build green.
 
 ---
 
-## Phase 4 — Reading tracking (plan written when phase starts)
+## Phase 4 — Reading tracking
 
 Source: spec §8.4 and §11 Phase 4.
+
+**Goal:** every household member can record what they are reading and how far
+along they are. A book page shows who is reading it, a Reading page shows who is
+reading what, the library can be narrowed by member/status, and the dashboard
+lists what is in progress right now.
+
+**Design:**
+
+- Migration `0004_members_and_reading`:
+  - `members(id, name varchar(100) not null, created_at)` with unique
+    `lower(name)`.
+  - `reading_entries(id, book_id, member_id, status varchar(20) not null,
+    current_page, started_on date, finished_on date, note text, updated_at)`.
+  - `unique(book_id, member_id)`, FKs with `ON DELETE CASCADE`, indexes on
+    `member_id` and `status`, and a check constraint limiting status to
+    `want_to_read | reading | finished | abandoned`.
+  - Working `downgrade()`.
+- ORM models `Member` and `ReadingEntry`; both sides of the relationship use
+  `cascade="all, delete-orphan"` so SQLite tests (no FK pragma) and PostgreSQL
+  both remove entries with the book or member. `Book.reading_entries` added.
+- `ReadingRepository` + `ReadingService`:
+  - members: list (name order), create, rename, delete.
+  - entries: list for a book, list filtered by member/status, upsert, delete.
+  - progress is derived, never stored.
+- Endpoints:
+  - `GET /members`, `POST /members`, `PATCH /members/{id}`,
+    `DELETE /members/{id}`. Duplicate name → 409, blank → 422.
+  - `GET /books/{id}/reading` — entries with member name, book title/pages.
+  - `PUT /books/{id}/reading/{member_id}` — upsert. `status=reading` defaults
+    `started_on` to today when absent; `finished` defaults `finished_on` to
+    today and, when the book has pages and `current_page` is omitted, sets
+    `current_page = pages`. Explicit `null` clears optional fields. Page above
+    `pages` → 422; finished before started → 422.
+  - `DELETE /books/{id}/reading/{member_id}` — 204/404.
+  - `GET /reading?member_id&status` — household entries ordered by most
+    recently updated, each with book title/pages and member name.
+- `GET /books` gains `member_id` and `status` filters using an `IN` subquery, so
+  a book with several matching entries appears once. `member_id` alone means
+  any entry; `status` alone means any member; both mean that member/status.
+- `GET /insights` adds `currently_reading`: member, book, current page, and
+  page count for entries with status `reading` (Phase 5 extends the rest).
+- Frontend:
+  - API client types/functions for members, reading entries, filters; add
+    `member_id`/`status` to book-list params and `currently_reading` to
+    insights.
+  - New Reading page (`/reading`) with member management (add, rename, delete),
+    member/status filters, and entry cards showing status, progress bar, dates,
+    note, and a book link. Empty states and member-delete confirmation.
+  - Book Details reading panel: entries per member with progress, dates, note,
+    edit/remove; one form (member + status + page + dates + note) to upsert.
+  - Library filters for member and status.
+  - Dashboard "Currently reading" section linking to books.
+  - Navigation entry for Reading.
+  - Shared `StatusBadge` and `ProgressBar` components; accessible labels,
+    44px hit targets, tabular numerals, and reduced-motion-safe styles.
+
+### Task 1: Migration, models, schemas
+
+**Files:** `backend/alembic/versions/0004_members_and_reading.py` (new),
+`backend/app/models/member.py` (new), `backend/app/models/reading.py` (new),
+`backend/app/models/book.py`, `backend/app/models/__init__.py`,
+`backend/app/schemas/reading.py` (new), `backend/app/core/errors.py`
+
+- Add the tables, relationship cascades, and Pydantic schemas described above.
+- `DuplicateMemberError` for the 409 path.
+
+### Task 2: Repository and service
+
+**Files:** `backend/app/repositories/reading.py` (new),
+`backend/app/services/reading.py` (new)
+
+- `ReadingRepository`: member CRUD with case-insensitive uniqueness, eager
+  entry queries, upsert (create or mutate), delete.
+- `ReadingService`: defaults, page/date validation, filtering, member deletion.
+
+### Task 3: Routes, filters, insights
+
+**Files:** `backend/app/api/v1/routes/members.py` (new),
+`backend/app/api/v1/routes/reading.py` (new), `backend/app/api/v1/router.py`,
+`backend/app/api/v1/routes/books.py`, `backend/app/repositories/book.py`,
+`backend/app/api/v1/routes/insights.py`, `backend/app/schemas/insights.py`
+
+- Mount member and reading routes.
+- Add `member_id`/`status` to `BookFilters` and the books list query.
+- Add `currently_reading` to insights.
+- Tests: `backend/tests/test_reading.py` (new) plus insights coverage.
+
+### Task 4: Frontend API, Reading page, book panel
+
+**Files:** `frontend/src/services/api.ts`,
+`frontend/src/components/StatusBadge.tsx` (new),
+`frontend/src/components/ProgressBar.tsx` (new),
+`frontend/src/pages/ReadingPage.tsx` (new),
+`frontend/src/pages/BookDetailsPage.tsx`, `frontend/src/App.tsx`,
+`frontend/src/layouts/AppLayout.tsx`, `frontend/src/hooks/useBooks.ts`
+
+- Client types and functions for members/entries.
+- Reading page with member management, filters, and entry cards.
+- Book Details reading panel with upsert/delete.
+- Reading navigation entry.
+
+### Task 5: Library filters, dashboard, styles, docs, gate
+
+**Files:** `frontend/src/pages/LibraryPage.tsx`,
+`frontend/src/pages/DashboardPage.tsx`, `frontend/src/styles.css`,
+`docs/API.md`, `docs/DATABASE.md`, `docs/SYSTEM_ARCHITECTURE.md`,
+`docs/superpowers/plans/2026-10-24-phase-1-closeout.md`, `.ai/state.md`
+
+- Library member/status filters; dashboard in-progress list.
+- Reading styles (cards, badges, progress, member rows, filters).
+- Document members/reading endpoints, filters, and tables.
+- Migration cycle, suite, build, and docs gate.
+
+**Exit criteria:** two members can record different progress on the same book;
+progress cannot exceed `pages`; finishing sets the finish date and page;
+`/reading`, the book page, and the dashboard agree; deleting a member or book
+removes their entries; suite and build green.
+
+**Gate:**
+
+- [x] `cd backend && python -m pytest -q` - 103 passed
+- [x] `cd frontend && npm run build` - green
+- [x] `0004_members_and_reading` upgrade → downgrade → upgrade on SQLite (and
+      PostgreSQL when available)
+- [x] Docs updated (`API.md`, `DATABASE.md`, `SYSTEM_ARCHITECTURE.md`)
+- [x] Status table and `.ai/state.md` updated; phase committed
 
 ## Phase 5 — Tags, notes, filters, dashboard (plan written when phase starts)
 

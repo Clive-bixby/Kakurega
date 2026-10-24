@@ -64,11 +64,13 @@ Frontend
 
 - React frontend in `frontend`
 - Routing configured with pages for Dashboard, Library, Add Book, Book Details,
-  Search, Import, Insights, and Settings
+  Reading, Search, Import, Insights, and Settings
 - API client in `frontend/src/services/api.ts`
 - Data fetching hook in `frontend/src/hooks/useBooks.ts`
 - Reusable `BookForm` (add/edit) and `TaxonomyPicker` (chips + debounced
   server search + create)
+- Shared `StatusBadge`, `ProgressBar`, and `EmptyState`; `ReadingPanel` on Book
+  Details
 
 Backend
 
@@ -78,8 +80,10 @@ Backend
 - Core settings, database session factory, and helpers under `backend/app/core`
   (`config`, `database`, `isbn`, `csv_import`, `uploads`, `errors`, `storage`)
 - SQLAlchemy models and associations under `backend/app/models`
-- Book, catalog, and taxonomy repositories under `backend/app/repositories`
-- Book, metadata, barcode, and import services under `backend/app/services`
+- Book, catalog, taxonomy, and reading repositories under
+  `backend/app/repositories`
+- Book, metadata, barcode, import, and reading services under
+  `backend/app/services`
 - Alembic migrations under `backend/alembic/versions`
 
 ---
@@ -93,6 +97,9 @@ Frontend
 - `useBooks` hook
 - `BookForm` — all book fields, taxonomy pickers, cover upload, duplicate link
 - `TaxonomyPicker` — removable chips, debounced search, create-on-enter
+- `StatusBadge` / `ProgressBar` — reading status and derived page progress
+- `EmptyState` — consistent empty/error-free placeholders
+- `ReadingPanel` — per-book reading entries and upsert form
 
 Backend
 
@@ -107,6 +114,8 @@ Backend
 - `ImportService` — per-row savepoints, duplicate handling, relationships
 - `CatalogRepository` — case-insensitive create-or-get for authors, publishers, genres, tags
 - `TaxonomyRepository` — taxonomy list/search and committed create-or-get
+- `ReadingRepository` / `ReadingService` — member CRUD, entry upsert,
+  progress/date validation, per-book and household reading lists
 - Metadata lookup service
 - Barcode decoding service
 
@@ -117,6 +126,7 @@ Backend
 Backend
 
 - `BookService` handles book CRUD.
+- `ReadingService` handles household members and reading entries.
 - Metadata lookup queries Open Library, then Google Books.
 - Barcode decoding uses `zxing-cpp`.
 
@@ -130,9 +140,9 @@ Frontend
 
 - `GET /api/v1/health`
 - `GET /api/v1/books` — paginated, filterable list; also the search endpoint
-  (`q`, `genre_id`, `year_from`, `year_to`, `sort`, `limit`, `offset`). Returns
-  `{items, total, limit, offset}`; items omit `description`, `notes`, and
-  resolved taxonomy names.
+  (`q`, `genre_id`, `year_from`, `year_to`, `member_id`, `status`, `sort`,
+  `limit`, `offset`). Returns `{items, total, limit, offset}`; items omit
+  `description`, `notes`, and resolved taxonomy names.
 - `GET /api/v1/books/{id}` — full book plus resolved `authors`, `genres`,
   `tags`, and `publisher`
 - `GET /api/v1/books/isbn/{isbn}` — existing book by either ISBN form, 404 when
@@ -142,8 +152,14 @@ Frontend
 - `DELETE /api/v1/books/{id}`
 - `GET/POST /api/v1/authors`, `/publishers`, `/genres`, `/tags` — taxonomy list
   (`q`, `limit`) and case-insensitive create-or-get
+- `GET/POST /api/v1/members`, `PATCH/DELETE /api/v1/members/{id}` — household
+  members; duplicate name → 409, blank → 422
+- `GET /api/v1/books/{id}/reading` — entries for one book
+- `PUT/DELETE /api/v1/books/{id}/reading/{member_id}` — upsert/remove a member's
+  entry; page > `pages` → 422, finished before started → 422
+- `GET /api/v1/reading?member_id&status` — household entries, newest first
 - `POST /api/v1/import/csv` — Goodreads/Kakurega CSV, 10 MB cap, per-row results
-- `GET /api/v1/insights`
+- `GET /api/v1/insights` — totals, years, and `currently_reading`
 - `POST /api/v1/upload/image` — 413 past 5 MB
 - `POST /api/v1/lookup`
 - `POST /api/v1/barcode` — only valid ISBN-10 / 978-979 ISBN-13 accepted
@@ -164,6 +180,8 @@ Tables
 - `book_genres`
 - `tags`
 - `book_tags`
+- `members`
+- `reading_entries`
 
 Relationships
 
@@ -171,6 +189,8 @@ Relationships
 - `book_authors` links books and authors
 - `book_genres` links books and genres
 - `book_tags` links books and tags (cascade delete)
+- `reading_entries.book_id` -> `books.id` and `reading_entries.member_id` ->
+  `members.id`, both cascading; one row per book/member pair
 
 Identity and indexes
 
@@ -179,12 +199,15 @@ Identity and indexes
 - `lower(name)` is unique on authors, publishers, genres, and tags.
 - `books.title`, `books.published_year`, and `books.publisher_id` are indexed.
 - `books.created_at` and `books.notes` were added in `0003`.
+- `members.name` is unique case-insensitively (`lower(name)`); reading entries
+  index `member_id` and `status` and check the status values.
 
 Migrations
 
 - `0001_create_books`
 - `0002_relationships`
 - `0003_identity_and_listing`
+- `0004_members_and_reading`
 
 ---
 
@@ -215,7 +238,7 @@ docs/
 
 Backend follows the planned FastAPI architecture and implements models, repositories, services, schemas, migrations, and tests.
 
-Frontend implements routing, layout, API client, and wired pages for Dashboard, Library, Add Book, Book Details, Import, and Insights. Add Book performs ISBN/barcode lookup and duplicate interception; Book Details displays and edits every catalog field.
+Frontend implements routing, layout, API client, and wired pages for Dashboard, Library, Add Book, Book Details, Reading, Import, Insights, Search, and Settings. Add Book performs ISBN/barcode lookup and duplicate interception; Book Details displays and edits every catalog field and hosts per-member reading tracking; Library filters by member/status; Dashboard lists what is currently being read.
 
 ---
 
@@ -230,7 +253,7 @@ Phased plan: `docs/superpowers/plans/2026-10-24-phase-1-closeout.md`.
 | 1 | Foundation and correctness | **Complete** |
 | 2 | Bulk import | **Complete** |
 | 3 | Catalog workflow | **Complete** |
-| 4 | Reading tracking | Not started |
+| 4 | Reading tracking | **Complete** |
 | 5 | Tags, notes, filters, dashboard | Not started |
 
 ## Foundation
@@ -254,15 +277,16 @@ Phased plan: `docs/superpowers/plans/2026-10-24-phase-1-closeout.md`.
 - [x] Barcode (ISBN-only)
 - [x] Metadata Lookup
 - [x] CSV / Goodreads bulk import
-- [ ] Reading tracking
+- [x] Reading tracking (members, status, progress, dates, notes)
 - [ ] OCR
 - [ ] Gemini Vision
 
 ## Frontend
 
 - [x] Dashboard
-- [x] Library (paginated)
-- [x] Book Details (full display and edit)
+- [x] Library (paginated, member/status filters)
+- [x] Book Details (full display and edit, reading panel)
+- [x] Reading (members, activity, filters)
 - [x] Search
 - [x] Add Book (ISBN lookup, barcode capture, manual entry, duplicate link)
 - [x] Catalog workflow (taxonomy pickers, ISBN by-line identity)

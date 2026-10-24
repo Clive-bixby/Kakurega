@@ -45,7 +45,7 @@ MVP Development
 
 Current Focus
 
-Phased roadmap to daily-use readiness is in progress (plan in `docs/superpowers/plans/`). Phases 1–3 (foundation, bulk import, catalog workflow) are complete; next are reading tracking and tags/notes/filters/dashboard. OCR and Gemini Vision remain future work.
+Phased roadmap to daily-use readiness is in progress (plan in `docs/superpowers/plans/`). Phases 1–4 (foundation, bulk import, catalog workflow, reading tracking) are complete; next is tags/notes/filters/dashboard. OCR and Gemini Vision remain future work.
 
 ---
 
@@ -106,6 +106,29 @@ Reason: Details and edit need names to render and prefill, while the list only
 needs ids and must stay cheap for thousands of books.
 Alternative considered: Client-side id-to-name resolution with extra requests.
 
+Decision: Household members are lightweight names with no auth, email, or login;
+reading state is one row per `(book, member)`.
+Reason: The app is a shared home library, so "who is reading this" must work
+without account setup while keeping the schema ready for real accounts later.
+Alternative considered: A full user table with credentials in v1.
+
+Decision: Reading progress is derived from `current_page / book.pages`, never
+stored as a percentage, and `current_page` cannot exceed `pages`.
+Reason: Page counts change and two stored representations can disagree.
+Alternative considered: Persisting a progress percentage alongside the page.
+
+Decision: Reading entries cascade through the ORM relationship
+(`cascade="all, delete-orphan"`) as well as the database `ON DELETE CASCADE`.
+Reason: SQLite tests run without foreign-key pragmas, so DB-only cascades would
+leave orphaned entries in tests.
+Alternative considered: Enabling `PRAGMA foreign_keys` only in tests.
+
+Decision: `GET /books?member_id&status` uses an `IN` subquery over
+`reading_entries` rather than a join.
+Reason: A book with several matching entries must appear once, and count queries
+must stay correct.
+Alternative considered: Joining and `DISTINCT`, which complicates pagination.
+
 ---
 
 # Established Patterns
@@ -156,6 +179,10 @@ Frontend
 - `PageHeader` provides the basic page title header.
 - `BookForm` renders every book field for both create and edit.
 - `TaxonomyPicker` provides chips, debounced search, and create-on-enter.
+- `StatusBadge` maps reading statuses to labels and badge classes.
+- `ProgressBar` renders accessible derived page progress with tabular numbers.
+- `EmptyState` standardises empty/placeholder panels.
+- `ReadingPanel` records one member's reading state for a book.
 
 Common hooks
 
@@ -166,12 +193,14 @@ Backend
 Shared services
 
 - `BookService` handles book CRUD.
+- `ReadingService` handles members and reading entries.
 - Metadata lookup service queries Open Library and Google Books.
 - Barcode decoding service extracts ISBNs.
 
 Repositories
 
 - `BookRepository` manages books and relationships.
+- `ReadingRepository` manages members and reading entries with eager loading.
 
 Utilities
 
