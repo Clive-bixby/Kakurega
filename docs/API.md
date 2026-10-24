@@ -52,6 +52,8 @@ Query parameters:
 | `q` | string | | Free text over title, subtitle, ISBNs, description, author and publisher names. `%`, `_`, and `\` are literal. A valid ISBN matches either ISBN form, with or without hyphens. |
 | `genre_id` | int | | Only books in this genre |
 | `year_from` / `year_to` | int | | Inclusive publication-year range |
+| `member_id` | int | | Only books this household member has any reading entry for |
+| `status` | `want_to_read` \| `reading` \| `finished` \| `abandoned` | | Only books with a reading entry in this status (any member unless `member_id` is also set) |
 | `sort` | `title` \| `added` \| `year` | `title` | `added` is newest first, `year` is newest publication first |
 | `limit` | int | 50 | 1–200 |
 | `offset` | int | 0 | |
@@ -334,6 +336,120 @@ Returns dashboard statistics:
 
 - `total_books`
 - `by_published_year`
+- `currently_reading` — one item per entry whose status is `reading`:
+
+```json
+{
+  "total_books": 42,
+  "by_published_year": {"2020": 4},
+  "currently_reading": [
+    {
+      "book_id": 7,
+      "book_title": "Example",
+      "member_id": 2,
+      "member_name": "Maya",
+      "current_page": 120,
+      "pages": 320
+    }
+  ]
+}
+```
+
+`current_page` and `pages` are `null` when unknown. Items are ordered by member
+name, then book title.
+
+---
+
+# 7.1 Household members and reading
+
+There is no authentication. A member is just a name in this household.
+
+## GET /members
+
+Returns all members ordered by name (case-insensitive):
+
+```json
+[{"id": 2, "name": "Maya", "created_at": "2026-10-24T10:00:00Z"}]
+```
+
+## POST /members
+
+Request body: `{"name": "Maya"}`. Names are trimmed, 1–100 characters, and
+unique case-insensitively (422 when blank, 409 when the name already exists).
+Returns 201 with the member. A duplicate name returns 409 with a plain string
+`detail`.
+
+## PATCH /members/{id}
+
+Renames a member. Same validation and 409 rules; 404 when the member does not
+exist.
+
+## DELETE /members/{id}
+
+Deletes a member and all of their reading entries (cascade). Returns 204, or 404
+when not found.
+
+## GET /books/{id}/reading
+
+Returns every member's reading entry for one book, ordered by member name. 404
+when the book does not exist. Each entry:
+
+```json
+{
+  "id": 11,
+  "book_id": 7,
+  "member_id": 2,
+  "member_name": "Maya",
+  "book_title": "Example",
+  "book_pages": 320,
+  "status": "reading",
+  "current_page": 120,
+  "started_on": "2026-10-20",
+  "finished_on": null,
+  "note": "Chapter 8 is great",
+  "updated_at": "2026-10-24T18:30:00Z"
+}
+```
+
+## PUT /books/{id}/reading/{member_id}
+
+Creates or replaces one member's entry for a book (at most one entry per
+book/member pair). Request body:
+
+```json
+{
+  "status": "reading",
+  "current_page": 120,
+  "started_on": "2026-10-20",
+  "finished_on": null,
+  "note": "Chapter 8 is great"
+}
+```
+
+Behaviour:
+
+- `status` is required and is one of `want_to_read`, `reading`, `finished`,
+  `abandoned`.
+- Omitted optional fields are left unchanged on an existing entry; explicit
+  `null` clears them.
+- `status=reading` clears `finished_on` (unless explicitly provided) and
+  defaults `started_on` to today when absent.
+- `status=finished` defaults `finished_on` to today and, when the book has a
+  page count and `current_page` is omitted, sets `current_page` to that count.
+- `current_page` must be ≥ 0 and cannot exceed the book's `pages` when known
+  (422). `finished_on` before `started_on` is 422.
+- Progress is derived from `current_page / pages`; no percentage is stored.
+- Returns 404 when the book or member does not exist.
+
+## DELETE /books/{id}/reading/{member_id}
+
+Removes one entry. Returns 204, or 404 when there is no such entry.
+
+## GET /reading
+
+Returns every entry in the household, most recently updated first, optionally
+filtered by `member_id` and/or `status`. Items use the same shape as
+`GET /books/{id}/reading`. An invalid `status` is 422.
 
 ------------------------------------------------------------------------
 
@@ -421,7 +537,7 @@ Examples:
 -   204 No Content
 -   400 Bad Request
 -   404 Not Found
--   409 Conflict (duplicate ISBN)
+-   409 Conflict (duplicate ISBN or member name)
 -   413 Payload Too Large
 -   422 Validation Error
 -   500 Internal Server Error
@@ -442,8 +558,12 @@ Recommendations
 
 Reading
 
-    POST /reading/session
-    GET /reading/history
+    Reading tracking is implemented for household members: `GET/POST /members`,
+    `PATCH/DELETE /members/{id}`, `GET /reading`, and
+    `GET/PUT/DELETE /books/{id}/reading[/{member_id}]`.
+
+    Future: `POST /reading/session`, `GET /reading/history` for page-level
+    sessions.
 
 Users
 

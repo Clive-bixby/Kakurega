@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { BookForm, BookFormInitial } from "../components/BookForm";
+import { ReadingPanel } from "../components/ReadingPanel";
 import { PageHeader } from "../shared/PageHeader";
+import { formatDate } from "../shared/format";
 import { Book, BookInput, deleteBook, fetchBook, updateBook } from "../services/api";
 
 function initialFromBook(book: Book): BookFormInitial {
@@ -24,16 +26,6 @@ function initialFromBook(book: Book): BookFormInitial {
     genres: book.genres.map((genre) => ({ id: genre.id, name: genre.name })),
     tags: book.tags.map((tag) => ({ id: tag.id, name: tag.name })),
   };
-}
-
-function formatDate(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
 }
 
 export function BookDetailsPage() {
@@ -179,6 +171,8 @@ export function BookDetailsPage() {
                 <p className="prose">{book.notes}</p>
               </section>
             )}
+
+            <ReadingPanel bookId={book.id} bookPages={book.pages} />
 
             <div className="form-actions">
               <button type="button" className="primary" onClick={() => setEditing(true)}>

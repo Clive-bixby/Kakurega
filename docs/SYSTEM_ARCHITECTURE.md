@@ -142,8 +142,8 @@ frontend/
 └── utils/
 ```
 
-Main pages: - Dashboard - Library - Book Details - Add Book - Import -
-Insights - Settings
+Main pages: Dashboard, Library, Book Details, Reading, Add Book, Import,
+Search, Insights, Settings
 
 ------------------------------------------------------------------------
 
@@ -236,6 +236,35 @@ matched by ISBN (or by title + author when no ISBN is usable); with
 `update_existing=true` only blank fields are filled.
 
 ------------------------------------------------------------------------
+
+## 8.1 Reading Tracking
+
+Members are household names, not accounts. `GET/POST /members` and
+`PATCH/DELETE /members/{id}` manage them; names are unique case-insensitively.
+
+`ReadingEntry` is the single row that describes one member's state for one
+book (`unique(book_id, member_id)`). `ReadingService` owns the rules:
+
+``` text
+Reading page ──► GET /reading?member_id&status
+Book page    ──► GET /books/{id}/reading
+                 PUT /books/{id}/reading/{member_id}  (upsert)
+                 DELETE /books/{id}/reading/{member_id}
+Library      ──► GET /books?member_id&status  (IN subquery, one row per book)
+Dashboard    ──► GET /insights → currently_reading
+```
+
+- `status=reading` defaults `started_on` to today and clears a stale
+  `finished_on`; `status=finished` defaults `finished_on` to today and sets
+  `current_page` to the book's page count when omitted.
+- `current_page` is validated against `books.pages`; `finished_on` may not
+  precede `started_on`.
+- Progress is derived in the UI from `current_page / pages`; the API never
+  stores a percentage.
+- Entries cascade when a book or member is deleted, and the ORM relationship
+  uses `delete-orphan` so this also holds on SQLite without FK pragmas.
+
+---
 
 ## 9. External Services
 

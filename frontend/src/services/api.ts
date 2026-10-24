@@ -79,6 +79,8 @@ export type BookListParams = {
   genre_id?: number;
   year_from?: number;
   year_to?: number;
+  member_id?: number;
+  status?: ReadingStatus;
   sort?: "title" | "added" | "year";
   limit?: number;
   offset?: number;
@@ -104,6 +106,14 @@ export async function searchBooks(q: string, limit = 50): Promise<BookPage> {
 export type Insights = {
   total_books: number;
   by_published_year: Record<string, number>;
+  currently_reading: {
+    book_id: number;
+    book_title: string;
+    member_id: number;
+    member_name: string;
+    current_page: number | null;
+    pages: number | null;
+  }[];
 };
 
 export async function fetchInsights(): Promise<Insights> {
@@ -260,5 +270,120 @@ export async function createTaxonomy(
     body: JSON.stringify({ name }),
   });
   if (!res.ok) throw await readError(res, "Failed to create option");
+  return res.json();
+}
+
+export type ReadingStatus =
+  | "want_to_read"
+  | "reading"
+  | "finished"
+  | "abandoned";
+
+export type Member = {
+  id: number;
+  name: string;
+  created_at: string;
+};
+
+export type ReadingEntry = {
+  id: number;
+  book_id: number;
+  member_id: number;
+  member_name: string;
+  book_title: string;
+  book_pages: number | null;
+  status: ReadingStatus;
+  current_page: number | null;
+  started_on: string | null;
+  finished_on: string | null;
+  note: string | null;
+  updated_at: string;
+};
+
+export type ReadingInput = {
+  status: ReadingStatus;
+  current_page?: number | null;
+  started_on?: string | null;
+  finished_on?: string | null;
+  note?: string | null;
+};
+
+export async function fetchMembers(): Promise<Member[]> {
+  const res = await fetch("/api/v1/members");
+  if (!res.ok) throw await readError(res, "Failed to load household members");
+  return res.json();
+}
+
+export async function createMember(name: string): Promise<Member> {
+  const res = await fetch("/api/v1/members", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+  if (!res.ok) throw await readError(res, "Failed to add member");
+  return res.json();
+}
+
+export async function updateMember(id: number, name: string): Promise<Member> {
+  const res = await fetch(`/api/v1/members/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+  if (!res.ok) throw await readError(res, "Failed to rename member");
+  return res.json();
+}
+
+export async function deleteMember(id: number): Promise<void> {
+  const res = await fetch(`/api/v1/members/${id}`, { method: "DELETE" });
+  if (!res.ok) throw await readError(res, "Failed to remove member");
+}
+
+export async function fetchBookReading(bookId: number): Promise<ReadingEntry[]> {
+  const res = await fetch(`/api/v1/books/${bookId}/reading`);
+  if (!res.ok) throw await readError(res, "Failed to load reading entries");
+  return res.json();
+}
+
+export async function upsertReading(
+  bookId: number,
+  memberId: number,
+  data: ReadingInput,
+): Promise<ReadingEntry> {
+  const res = await fetch(`/api/v1/books/${bookId}/reading/${memberId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw await readError(res, "Failed to save reading entry");
+  return res.json();
+}
+
+export async function deleteReading(
+  bookId: number,
+  memberId: number,
+): Promise<void> {
+  const res = await fetch(`/api/v1/books/${bookId}/reading/${memberId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw await readError(res, "Failed to remove reading entry");
+}
+
+export type ReadingListParams = {
+  member_id?: number;
+  status?: ReadingStatus;
+};
+
+export async function fetchReading(
+  params: ReadingListParams = {},
+): Promise<ReadingEntry[]> {
+  const search = new URLSearchParams();
+  if (params.member_id !== undefined) {
+    search.set("member_id", String(params.member_id));
+  }
+  if (params.status) search.set("status", params.status);
+  const query = search.toString();
+  const res = await fetch(`/api/v1/reading${query ? `?${query}` : ""}`);
+  if (!res.ok) throw await readError(res, "Failed to load reading list");
   return res.json();
 }

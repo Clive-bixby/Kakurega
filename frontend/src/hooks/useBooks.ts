@@ -7,12 +7,23 @@ export function useBooks(params: BookListParams = {}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { q, genre_id, year_from, year_to, sort, limit, offset } = params;
+  const { q, genre_id, year_from, year_to, member_id, status, sort, limit, offset } =
+    params;
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchBooks({ q, genre_id, year_from, year_to, sort, limit, offset })
+    fetchBooks({
+      q,
+      genre_id,
+      year_from,
+      year_to,
+      member_id,
+      status,
+      sort,
+      limit,
+      offset,
+    })
       .then((data) => {
         if (!cancelled) setPage(data);
       })
@@ -25,7 +36,7 @@ export function useBooks(params: BookListParams = {}) {
     return () => {
       cancelled = true;
     };
-  }, [q, genre_id, year_from, year_to, sort, limit, offset]);
+  }, [q, genre_id, year_from, year_to, member_id, status, sort, limit, offset]);
 
   return { page, books: page?.items ?? [], total: page?.total ?? 0, loading, error };
 }

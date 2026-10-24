@@ -6,6 +6,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { InsightsPage } from "./pages/InsightsPage";
 import { ImportPage } from "./pages/ImportPage";
 import { LibraryPage } from "./pages/LibraryPage";
+import { ReadingPage } from "./pages/ReadingPage";
 import { SearchPage } from "./pages/SearchPage";
 import { SettingsPage } from "./pages/SettingsPage";
 
@@ -16,7 +17,8 @@ export default function App() {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="library" element={<LibraryPage />} />
-<Route path="library/:id" element={<BookDetailsPage />} />
+        <Route path="library/:id" element={<BookDetailsPage />} />
+        <Route path="reading" element={<ReadingPage />} />
         <Route path="add-book" element={<AddBookPage />} />
         <Route path="import" element={<ImportPage />} />
         <Route path="search" element={<SearchPage />} />

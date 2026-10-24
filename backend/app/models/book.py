@@ -52,6 +52,9 @@ class Book(Base):
     authors: Mapped[list["Author"]] = relationship("Author", secondary=book_authors)
     genres: Mapped[list["Genre"]] = relationship("Genre", secondary=book_genres)
     tags: Mapped[list[Tag]] = relationship("Tag", secondary=book_tags)
+    reading_entries: Mapped[list["ReadingEntry"]] = relationship(
+        back_populates="book", cascade="all, delete-orphan"
+    )
 
     @property
     def author_ids(self) -> list[int]:

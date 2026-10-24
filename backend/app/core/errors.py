@@ -10,3 +10,12 @@ class DuplicateBookError(DomainError):
 
 class InvalidReferenceError(DomainError):
     pass
+
+
+class DuplicateMemberError(DomainError):
+    def __init__(self):
+        super().__init__("A member with this name already exists")
+
+
+class InvalidReadingError(DomainError):
+    pass

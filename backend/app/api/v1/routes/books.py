@@ -8,6 +8,7 @@ from app.core.errors import DuplicateBookError, InvalidReferenceError
 from app.core.isbn import canonicalize_isbns, normalize_isbn
 from app.repositories.book import BookFilters
 from app.schemas.book import BookCreate, BookPage, BookRead, BookUpdate
+from app.schemas.reading import ReadingStatus
 from app.services.book import BookService
 
 router = APIRouter()
@@ -19,6 +20,8 @@ def list_books(
     genre_id: int | None = None,
     year_from: int | None = Query(default=None, ge=1000),
     year_to: int | None = Query(default=None, ge=1000),
+    member_id: int | None = None,
+    status: ReadingStatus | None = None,
     sort: Literal["title", "added", "year"] = "title",
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
@@ -29,6 +32,8 @@ def list_books(
         genre_id=genre_id,
         year_from=year_from,
         year_to=year_to,
+        member_id=member_id,
+        status=status,
     )
     items, total = BookService(db).list_books(filters, limit, offset, sort)
     return BookPage(items=items, total=total, limit=limit, offset=offset)

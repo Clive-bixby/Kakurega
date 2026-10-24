@@ -12,6 +12,7 @@ from app.models.author import Author
 from app.models.book import Book
 from app.models.genre import Genre
 from app.models.publisher import Publisher
+from app.models.reading import ReadingEntry
 from app.models.tag import Tag
 from app.schemas.book import BookCreate, BookUpdate
 
@@ -22,6 +23,8 @@ class BookFilters:
     genre_id: int | None = None
     year_from: int | None = None
     year_to: int | None = None
+    member_id: int | None = None
+    status: str | None = None
 
 
 def _escape_like(value: str) -> str:
@@ -83,6 +86,16 @@ class BookRepository:
             count_statement = count_statement.join(Book.genres).where(
                 Genre.id == filters.genre_id
             )
+
+        entry_conditions = []
+        if filters.member_id is not None:
+            entry_conditions.append(ReadingEntry.member_id == filters.member_id)
+        if filters.status is not None:
+            entry_conditions.append(ReadingEntry.status == filters.status)
+        if entry_conditions:
+            matching_books = select(ReadingEntry.book_id).where(*entry_conditions)
+            statement = statement.where(Book.id.in_(matching_books))
+            count_statement = count_statement.where(Book.id.in_(matching_books))
 
         if filters.year_from is not None:
             statement = statement.where(Book.published_year >= filters.year_from)

@@ -21,12 +21,14 @@ The following tables are implemented and migrated:
 - `book_genres`
 - `tags`
 - `book_tags`
+- `members`
+- `reading_entries`
 
 The following are planned but not yet implemented:
 
 - `series`
 - `book_copies`
-- user, reading, and import staging tables
+- import staging tables
 
 ### Book
 
@@ -106,6 +108,32 @@ Represents a physical copy owned.
 -   book_id (FK, cascades)
 -   tag_id (FK, cascades)
 
+### Member
+
+A person in the household. No authentication, email, or login.
+
+-   id
+-   name (varchar(100), unique case-insensitively via a `lower(name)` index)
+-   created_at
+
+### ReadingEntry
+
+One member's reading state for one book; at most one row per book/member pair.
+
+-   id
+-   book_id (FK, cascades with the book)
+-   member_id (FK, cascades with the member)
+-   status (`want_to_read` | `reading` | `finished` | `abandoned`, check
+    constrained)
+-   current_page (nullable; validated against `books.pages` when known)
+-   started_on (date, nullable)
+-   finished_on (date, nullable; cannot precede `started_on`)
+-   note (text, nullable)
+-   updated_at
+
+Progress is derived from `current_page / pages`; no percentage is stored.
+Indexes cover `member_id` and `status` for the reading list and book filters.
+
 ## Future Tables
 
 ### User
@@ -173,9 +201,11 @@ UserBook (Future)
 
 -   Book stores universal metadata.
 -   BookCopy stores ownership information (not implemented yet).
--   UserBook stores personal reading information (not implemented yet).
+-   Member + ReadingEntry replace the planned UserBook table for the current
+    single-household model; User/ReadingSession remain future work for accounts
+    and page-level history.
 -   Author, Publisher, and Genre relationships are implemented.
 -   ISBN is the book's identity: unique partial indexes plus canonicalisation to
       ISBN-13 prevent duplicate rows.
--   Series, BookCopy, and user/reading tables remain future work.
+-   Series and BookCopy remain future work.
 -   This schema supports future family accounts without major redesign.
