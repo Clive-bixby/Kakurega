@@ -1,7 +1,6 @@
 import {
   BarChart3,
   BookMarked,
-  BookOpen,
   Home,
   Library,
   Plus,
@@ -49,7 +48,7 @@ export function AppLayout() {
       <aside className="sidebar" aria-label="Primary navigation">
         <Link to="/dashboard" className="brand">
           <span className="brand-mark" aria-hidden="true">
-            <BookOpen size={20} />
+            <img src="/favicon.svg" alt="" width="40" height="40" />
           </span>
           <span className="brand-text">
             <span className="brand-name">Kakurega</span>

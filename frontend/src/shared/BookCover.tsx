@@ -44,7 +44,17 @@ export function BookCover({
       style={{ background: gradientFor(title) }}
       aria-hidden="true"
     >
-      <span className="cover-mark">Kakurega</span>
+      <div className="cover-head">
+        <img
+          className="cover-emblem"
+          src="/favicon.svg"
+          alt=""
+          width="24"
+          height="24"
+          loading="lazy"
+        />
+        <span className="cover-mark">Kakurega</span>
+      </div>
       <span className="cover-title">{title}</span>
       <span className="cover-rule" />
     </div>

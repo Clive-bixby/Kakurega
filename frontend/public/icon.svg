@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Kakurega">
+  <title>Kakurega</title>
+  <defs>
+    <linearGradient id="plate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1A1E25" />
+      <stop offset="1" stop-color="#0B0D11" />
+    </linearGradient>
+    <radialGradient id="niche" cx="50%" cy="32%" r="78%">
+      <stop offset="0" stop-color="#28303D" />
+      <stop offset="1" stop-color="#151A23" />
+    </radialGradient>
+    <path id="spark" d="M0 -10 C1.7 -1.7 1.7 -1.7 10 0 C1.7 1.7 1.7 1.7 0 10 C-1.7 1.7 -1.7 1.7 -10 0 C-1.7 -1.7 -1.7 -1.7 0 -10 Z" />
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#plate)" />
+
+  <!-- outer ring -->
+  <circle cx="256" cy="256" r="198" fill="none" stroke="#C7A363" stroke-width="5" />
+  <circle cx="256" cy="256" r="181" fill="none" stroke="#C7A363" stroke-width="1.5" opacity="0.38" />
+  <circle cx="58" cy="256" r="5" fill="#C7A363" />
+  <circle cx="454" cy="256" r="5" fill="#C7A363" />
+  <circle cx="256" cy="454" r="5" fill="#C7A363" />
+
+  <!-- arched doorway -->
+  <path d="M180 370 L180 262 A76 76 0 0 1 332 262 L332 370 Z" fill="url(#niche)" stroke="#C7A363" stroke-width="5" stroke-linejoin="round" />
+
+  <!-- bracket ticks -->
+  <path d="M150 246 H171" stroke="#C7A363" stroke-width="3" stroke-linecap="round" opacity="0.75" />
+  <path d="M341 246 H362" stroke="#C7A363" stroke-width="3" stroke-linecap="round" opacity="0.75" />
+
+  <!-- keyhole -->
+  <circle cx="256" cy="262" r="9.5" fill="#E7C583" />
+  <path d="M252.4 269 L250 290 Q256 294.5 262 290 L259.6 269 Z" fill="#E7C583" />
+
+  <!-- starlight inside the niche -->
+  <use href="#spark" transform="translate(224 222) scale(0.9)" fill="#E7C583" />
+  <use href="#spark" transform="translate(290 238) scale(0.55)" fill="#E7C583" />
+  <use href="#spark" transform="translate(244 196) scale(0.4)" fill="#E7C583" />
+  <circle cx="302" cy="272" r="2.2" fill="#E7C583" />
+  <circle cx="210" cy="278" r="2.2" fill="#E7C583" />
+
+  <!-- open book -->
+  <path d="M256 346 C238 336 214 333 196 338 L196 364 C214 359 238 362 256 372 Z" fill="#F4EEE2" stroke="#C7A363" stroke-width="2.5" stroke-linejoin="round" />
+  <path d="M256 346 C274 336 298 333 316 338 L316 364 C298 359 274 362 256 372 Z" fill="#F4EEE2" stroke="#C7A363" stroke-width="2.5" stroke-linejoin="round" />
+  <path d="M256 346 V372" stroke="#C7A363" stroke-width="3" stroke-linecap="round" />
+  <path d="M206 347 C222 344 240 347 252 354" fill="none" stroke="#C7A363" stroke-width="1.4" opacity="0.45" stroke-linecap="round" />
+  <path d="M306 347 C290 344 272 347 260 354" fill="none" stroke="#C7A363" stroke-width="1.4" opacity="0.45" stroke-linecap="round" />
+
+  <!-- step -->
+  <path d="M176 377 H336" stroke="#C7A363" stroke-width="5" stroke-linecap="round" />
+  <path d="M196 387 H316" stroke="#C7A363" stroke-width="2" opacity="0.5" stroke-linecap="round" />
+
+  <!-- outer sparkles -->
+  <use href="#spark" transform="translate(140 160) scale(1.05)" fill="#E7C583" />
+  <use href="#spark" transform="translate(390 204) scale(0.7)" fill="#C7A363" />
+  <use href="#spark" transform="translate(130 350) scale(0.55)" fill="#C7A363" />
+  <use href="#spark" transform="translate(384 344) scale(0.85)" fill="#E7C583" />
+</svg>
