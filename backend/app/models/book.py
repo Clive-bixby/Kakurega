@@ -61,6 +61,10 @@ class Book(Base):
         return [author.id for author in self.authors]
 
     @property
+    def author_names(self) -> list[str]:
+        return [author.name for author in self.authors]
+
+    @property
     def genre_ids(self) -> list[int]:
         return [genre.id for genre in self.genres]
 

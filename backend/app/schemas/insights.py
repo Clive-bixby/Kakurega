@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 class CurrentlyReading(BaseModel):
     book_id: int
     book_title: str
+    cover_url: str | None = None
+    author_name: str | None = None
     member_id: int
     member_name: str
     current_page: int | None
@@ -22,6 +24,7 @@ class RecentlyAdded(BaseModel):
     book_id: int
     title: str
     cover_url: str | None
+    author_name: str | None = None
     created_at: datetime
 
 

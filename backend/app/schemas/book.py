@@ -121,6 +121,7 @@ class BookListItem(BaseModel):
     publisher_id: int | None
     created_at: datetime
     author_ids: list[int]
+    author_names: list[str] = Field(default_factory=list)
     genre_ids: list[int]
     tag_ids: list[int]
 

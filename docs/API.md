@@ -75,7 +75,8 @@ Response:
       "published_year": null,
       "cover_url": null,
       "publisher_id": null,
-      "author_ids": [],
+      "author_ids": [1],
+      "author_names": ["Author Name"],
       "genre_ids": [],
       "tag_ids": [],
       "created_at": "2026-10-24T10:00:00Z"
@@ -88,7 +89,9 @@ Response:
 ```
 
 List items omit `description`, `notes`, and the resolved `authors`, `genres`,
-`tags`, and `publisher` objects; fetch `GET /books/{id}` for those.
+`tags`, and `publisher` objects; fetch `GET /books/{id}` for those. `author_names`
+carries the author names in `author_ids` order so grid and card views can render
+a byline without a second request.
 
 ------------------------------------------------------------------------
 
@@ -362,8 +365,8 @@ Returns dashboard statistics:
 - `by_author` — top 10 authors as `{id, name, count}`, highest count first
 - `by_language` — map of language to book count
 - `currently_reading` — one item per entry whose status is `reading`, ordered
-  by member name then book title
-- `recently_added` — the 5 newest books, newest first
+  by member name then book title, with the book's cover and first author
+- `recently_added` — the 5 newest books, newest first, with cover and first author
 
 ```json
 {
@@ -377,6 +380,8 @@ Returns dashboard statistics:
     {
       "book_id": 7,
       "book_title": "Example",
+      "cover_url": null,
+      "author_name": "Ursula K. Le Guin",
       "member_id": 2,
       "member_name": "Maya",
       "current_page": 120,
@@ -388,14 +393,16 @@ Returns dashboard statistics:
       "book_id": 7,
       "title": "Example",
       "cover_url": null,
+      "author_name": "Ursula K. Le Guin",
       "created_at": "2026-10-24T10:00:00Z"
     }
   ]
 }
 ```
 
-`current_page` and `pages` are `null` when unknown. Books without a year,
-language, genre, or author are omitted from the corresponding breakdown.
+`current_page` and `pages` are `null` when unknown, and `cover_url` and
+`author_name` are `null` when the book has no cover or no author. Books without a
+year, language, genre, or author are omitted from the corresponding breakdown.
 
 ---
 

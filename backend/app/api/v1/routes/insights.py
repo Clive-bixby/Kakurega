@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.api.deps import get_db
 from app.models.associations import book_authors, book_genres
@@ -65,7 +65,8 @@ def insights(db: Session = Depends(get_db)):
             .join(ReadingEntry.book)
             .where(ReadingEntry.status == "reading")
             .options(
-                joinedload(ReadingEntry.member), joinedload(ReadingEntry.book)
+                joinedload(ReadingEntry.member),
+                joinedload(ReadingEntry.book).selectinload(Book.authors),
             )
             .order_by(func.lower(Member.name), func.lower(Book.title))
         )
@@ -78,6 +79,7 @@ def insights(db: Session = Depends(get_db)):
         db.execute(
             select(Book)
             .order_by(Book.created_at.desc(), Book.id.desc())
+            .options(selectinload(Book.authors))
             .limit(RECENT_LIMIT)
         )
         .scalars()
@@ -99,6 +101,10 @@ def insights(db: Session = Depends(get_db)):
             CurrentlyReading(
                 book_id=entry.book_id,
                 book_title=entry.book.title,
+                cover_url=entry.book.cover_url,
+                author_name=(
+                    entry.book.authors[0].name if entry.book.authors else None
+                ),
                 member_id=entry.member_id,
                 member_name=entry.member.name,
                 current_page=entry.current_page,
@@ -111,6 +117,7 @@ def insights(db: Session = Depends(get_db)):
                 book_id=book.id,
                 title=book.title,
                 cover_url=book.cover_url,
+                author_name=book.authors[0].name if book.authors else None,
                 created_at=book.created_at,
             )
             for book in recent

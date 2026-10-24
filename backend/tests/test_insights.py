@@ -22,8 +22,15 @@ def test_insights(client):
 
 
 def test_insights_lists_currently_reading(client):
+    author = client.post("/api/v1/authors", json={"name": "Amy Author"}).json()
     book = client.post(
-        "/api/v1/books", json={"title": "One", "pages": 300}
+        "/api/v1/books",
+        json={
+            "title": "One",
+            "pages": 300,
+            "cover_url": "/storage/images/one.jpg",
+            "author_ids": [author["id"]],
+        },
     ).json()
     member = client.post("/api/v1/members", json={"name": "Amy"}).json()
     client.put(
@@ -37,12 +44,15 @@ def test_insights_lists_currently_reading(client):
         {
             "book_id": book["id"],
             "book_title": "One",
+            "cover_url": "/storage/images/one.jpg",
+            "author_name": "Amy Author",
             "member_id": member["id"],
             "member_name": "Amy",
             "current_page": 75,
             "pages": 300,
         }
     ]
+    assert data["recently_added"][0]["author_name"] == "Amy Author"
 
 
 def _named(client, kind, name):
