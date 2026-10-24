@@ -275,7 +275,12 @@ Response:
 }
 ```
 
-Returns 404 when no match is found and 502 when both upstreams fail.
+Returns `404` when no match is found, `422` when the supplied ISBN is not a valid
+10/13-digit number with a correct checksum, `502` when the providers cannot be
+reached, and `503` when Google Books reports an exhausted quota. Lookups are
+cached in-process for 24 hours on success, and a quota rejection pauses Google
+Books retries for 15 minutes. ISBN inputs may contain hyphens or spaces; the
+service normalizes them and looks up the ISBN-13 form.
 
 ------------------------------------------------------------------------
 

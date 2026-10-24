@@ -86,6 +86,12 @@ export function AddBookPage() {
       if (err instanceof ApiError && err.status === 404) {
         showForm(manualInitial(cleaned));
         setNotice("No metadata found. Enter the details manually.");
+      } else if (
+        err instanceof ApiError &&
+        (err.status === 502 || err.status === 503)
+      ) {
+        showForm(manualInitial(cleaned));
+        setNotice(err.message);
       } else {
         setError(
           err instanceof Error ? err.message : "Metadata lookup failed",

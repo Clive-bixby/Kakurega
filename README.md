@@ -236,6 +236,7 @@ reads `backend/.env` if present. Defaults are shown below.
 | `KAKUREGA_API_V1_PREFIX` | `/api/v1` | Prefix for every API route |
 | `KAKUREGA_DATABASE_URL` | `postgresql+psycopg://kakurega:kakurega_password@localhost:5432/kakurega` | SQLAlchemy URL; SQLite is also supported |
 | `KAKUREGA_CORS_ALLOWED_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173` | Comma-separated origins allowed to call the API |
+| `KAKUREGA_GOOGLE_BOOKS_API_KEY` | *(empty)* | Optional Google Books key; without one, Google's shared anonymous project is used and is often rate-limited |
 
 Compose-only variables (root `.env`):
 
@@ -306,9 +307,16 @@ Try these valid ISBNs:
 | `9780441172719` | *Dune* |
 | `9780553380163` | *A Brief History of Time* |
 
-ISBN lookups are the only feature that talks to the outside world (Open Library,
-then Google Books). If both are unreachable, you can still fill the form in by
-hand.
+ISBN lookups are the only feature that talks to the outside world. Kakurega
+normalizes and checksum-validates the ISBN, queries Open Library first, and falls
+back to Google Books when Open Library has no edition or returns unusable data.
+Successful lookups are cached in the API process for a day.
+
+Google Books works without a key, but anonymous traffic uses Google's shared
+project, which is frequently rate-limited (HTTP 429). To use your own quota, set
+`KAKUREGA_GOOGLE_BOOKS_API_KEY` and restart the API. If both providers are down or
+Google's quota is exhausted, the lookup reports why and opens the blank form with
+the ISBN filled in, so you can still save the book manually.
 
 ### Importing a CSV
 
@@ -484,7 +492,9 @@ small sizes — the thin gold lines disappear otherwise.
 | CORS error when the frontend calls the API directly | Add the browser origin to `KAKUREGA_CORS_ALLOWED_ORIGINS` (comma-separated) and restart the API. |
 | `alembic upgrade head` hits the wrong database | Alembic ignores `alembic.ini`'s URL and reads `KAKUREGA_DATABASE_URL`; export it in the same shell. Check with `alembic current`. |
 | Covers upload but show as broken images | `backend/storage/images/` is missing or not mounted, or the reverse proxy is not forwarding `/storage`. |
-| ISBN lookup returns nothing | Open Library and Google Books were unreachable, or the ISBN is invalid/unknown. Check the checksum and try again, or type the details manually. |
+| ISBN lookup says the Google Books quota is exhausted (HTTP 503) | Anonymous Google Books traffic uses a shared project with no guaranteed quota. Set `KAKUREGA_GOOGLE_BOOKS_API_KEY` to a key from a project with the Books API enabled and a non-zero daily quota, then restart the API. Billing alone does not raise a quota that is set to zero. Until then, add the book manually. |
+| ISBN lookup returns 422 "Invalid ISBN" | The number failed its checksum or is not 10/13 digits. Re-check the printed ISBN; do not add check digits yourself. |
+| ISBN lookup returns nothing (HTTP 404) | Both providers had no record. Check the ISBN, or type the details manually. |
 | CSV import reports "Missing title" | The file has no `title` column (or the header row is not first). |
 | Docker build fails on Windows with path errors | Ensure the repository is on the Linux filesystem or inside WSL if you use WSL-based Docker, and that Docker Desktop has the drive shared. |
 

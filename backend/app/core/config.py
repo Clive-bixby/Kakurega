@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     cors_allowed_origins: str = Field(
         default="http://localhost:5173,http://127.0.0.1:5173"
     )
+    google_books_api_key: str = Field(default="")
 
     @property
     def cors_origins(self) -> list[str]:
