@@ -9,7 +9,24 @@
 -   Normalize reusable entities (Author, Genre, Publisher, Series).
 -   Support recommendations and analytics without schema changes.
 
-## Core Entities
+## Implemented Tables
+
+The following tables are implemented and migrated:
+
+- `authors`
+- `books`
+- `publishers`
+- `genres`
+- `book_authors`
+- `book_genres`
+
+The following are planned but not yet implemented:
+
+- `series`
+- `book_copies`
+- `tags`
+- `book_tags`
+- user and reading tables
 
 ### Book
 
@@ -152,4 +169,6 @@ UserBook (Future)
 -   Book stores universal metadata.
 -   BookCopy stores ownership information.
 -   UserBook stores personal reading information.
+-   Author, Publisher, and Genre relationships are implemented.
+-   Series, BookCopy, Tag, and user tables remain future work.
 -   This schema supports future family accounts without major redesign.

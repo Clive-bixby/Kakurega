@@ -62,19 +62,23 @@ PostgreSQL      Local Storage    External Services
 -   Vite
 -   TypeScript
 -   Tailwind CSS
--   React Query
 -   React Router
 
 ### Backend
 
 -   FastAPI
 -   SQLAlchemy
--   Pydantic
 -   Alembic
+-   Pydantic
+-   httpx
+-   python-multipart
+-   zxing-cpp
+-   Pillow
 
 ### Database
 
 -   PostgreSQL
+-   SQLite for tests
 
 ### Containerization
 
@@ -88,7 +92,6 @@ Initially local filesystem:
 ``` text
 storage/
 └── images/
-    └── covers/
 ```
 
 Future: - AWS S3 - Google Cloud Storage
@@ -190,6 +193,10 @@ Secondary metadata source.
 ### Gemini Vision
 
 Fallback when metadata cannot be identified.
+
+### Barcode Decoding
+
+Uses zxing-cpp with Pillow for local image decoding.
 
 ------------------------------------------------------------------------
 

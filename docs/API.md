@@ -40,26 +40,31 @@ Standard error response:
 
 ## GET /books
 
-Returns paginated list of books.
+Returns all books.
 
-### Query Parameters
+Response:
 
--   page
--   limit
--   search
--   sort
--   order
-
-### Filters
-
--   author
--   genre
--   publisher
--   language
--   read_status
--   favorite
--   tag
--   year
+```json
+[
+  {
+    "id": 1,
+    "title": "Example",
+    "subtitle": null,
+    "isbn10": null,
+    "isbn13": null,
+    "description": null,
+    "pages": null,
+    "language": null,
+    "published_year": null,
+    "cover_url": null,
+    "google_books_id": null,
+    "openlibrary_id": null,
+    "publisher_id": null,
+    "author_ids": [],
+    "genre_ids": []
+  }
+]
+```
 
 ------------------------------------------------------------------------
 
@@ -75,14 +80,26 @@ Creates a new book.
 
 Request body:
 
-``` json
+```json
 {
-  "title": "",
-  "isbn13": "",
-  "author_ids": [],
-  "publisher_id": 1
+  "title": "Example",
+  "subtitle": null,
+  "isbn10": null,
+  "isbn13": null,
+  "description": null,
+  "pages": null,
+  "language": null,
+  "published_year": null,
+  "cover_url": null,
+  "google_books_id": null,
+  "openlibrary_id": null,
+  "publisher_id": 1,
+  "author_ids": [1],
+  "genre_ids": [1]
 }
 ```
+
+Returns the created book. Invalid `publisher_id`, `author_ids`, or `genre_ids` return 400.
 
 ------------------------------------------------------------------------
 
@@ -90,11 +107,13 @@ Request body:
 
 Updates book metadata.
 
+Request body accepts the same fields as create, all optional. Returns 404 when the book does not exist and 400 for invalid relationship IDs.
+
 ------------------------------------------------------------------------
 
 ## DELETE /books/{id}
 
-Deletes a book from the catalog.
+Deletes a book from the catalog. Returns 204 on success and 404 when not found.
 
 ------------------------------------------------------------------------
 
@@ -102,16 +121,18 @@ Deletes a book from the catalog.
 
 ## POST /upload/image
 
-Uploads a book image.
+Uploads a book image (`multipart/form-data`, field `file`). Accepts JPEG, PNG, and WebP up to 5 MB. The file bytes are validated and the extension is derived from the detected image format, not the client filename.
 
 Response:
 
 ``` json
 {
   "image_id":"...",
-  "path":"storage/images/..."
+  "path":"/storage/images/..."
 }
 ```
+
+The returned `path` is served directly by the API (mount at `/storage`); use it as a book's `cover_url`. Returns 400 for empty, oversized, or non-image files.
 
 ------------------------------------------------------------------------
 
@@ -132,7 +153,19 @@ Returns metadata with confidence score.
 
 ## POST /barcode
 
-Extract ISBN from uploaded image.
+Extracts an ISBN from an uploaded image.
+
+Request: multipart form data with `file`.
+
+Response:
+
+```json
+{
+  "isbn": "9780140328721"
+}
+```
+
+Returns 400 for invalid or unsupported images and 404 when no ISBN barcode is found.
 
 ------------------------------------------------------------------------
 
@@ -144,10 +177,38 @@ Extract visible text from image.
 
 ## POST /lookup
 
-Lookup metadata using:
+Looks up metadata using Open Library, then Google Books.
 
--   Open Library
--   Google Books
+Request body:
+
+```json
+{
+  "isbn": "9780140328721",
+  "title": "Example",
+  "author": "Author Name"
+}
+```
+
+All fields are optional.
+
+Response:
+
+```json
+{
+  "title": "Example",
+  "authors": ["Author Name"],
+  "publisher": "Publisher",
+  "published_year": 2020,
+  "isbn10": "0140328726",
+  "isbn13": "9780140328721",
+  "description": "Description",
+  "cover_url": "https://example.com/cover.jpg",
+  "source": "open_library",
+  "confidence": 0.9
+}
+```
+
+Returns 404 when no match is found and 502 when both upstreams fail.
 
 ------------------------------------------------------------------------
 
@@ -155,15 +216,13 @@ Lookup metadata using:
 
 ## GET /search
 
-Global search across:
+Searches books by title, ISBN, and description.
 
--   Title
--   Author
--   ISBN
--   Publisher
--   Genre
--   Tags
--   Notes
+Query parameter:
+
+- `q`
+
+Returns a list of matching books.
 
 ------------------------------------------------------------------------
 
@@ -205,14 +264,8 @@ Global search across:
 
 Returns dashboard statistics:
 
--   Total books
--   Books read
--   Unread books
--   Favorites
--   Genre distribution
--   Reading trends
--   Publication timeline
--   Books added
+- `total_books`
+- `by_published_year`
 
 ------------------------------------------------------------------------
 
