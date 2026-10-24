@@ -45,7 +45,7 @@ MVP Development
 
 Current Focus
 
-Building a clean and maintainable foundation before adding advanced features.
+Backend and frontend MVP flows are implemented. Identification pipeline has upload, barcode detection, and metadata lookup; OCR and Gemini Vision remain.
 
 ---
 
@@ -81,11 +81,16 @@ Backend
 
 - FastAPI app creation lives in `backend/app/main.py` via `create_app()`.
 - Versioned routes are collected under `backend/app/api/v1` and mounted at the configured API prefix.
+- Route dependencies use `request.app.state.session_factory` for database sessions.
+- Business logic lives in services; database access lives in repositories.
+- Pydantic schemas live under `backend/app/schemas`.
 
 Frontend
 
 - React routing is centralized in `frontend/src/App.tsx`.
 - The primary application shell lives in `frontend/src/layouts/AppLayout.tsx`.
+- API calls are centralized in `frontend/src/services/api.ts`.
+- Data fetching uses small hooks such as `useBooks`.
 
 ---
 
@@ -102,17 +107,27 @@ Frontend
 
 Common hooks
 
+- `useBooks` fetches and exposes book list state.
+
 Backend
 
 Shared services
 
+- `BookService` handles book CRUD.
+- Metadata lookup service queries Open Library and Google Books.
+- Barcode decoding service extracts ISBNs.
+
 Repositories
+
+- `BookRepository` manages books and relationships.
 
 Utilities
 
+- `create_app()` builds the FastAPI application and lifespan.
+
 Infrastructure
 
-Do not list every file.
+- Docker Compose provides PostgreSQL, backend, and frontend.
 
 Only list reusable building blocks that future features should discover instead of recreating.
 
@@ -120,17 +135,10 @@ Only list reusable building blocks that future features should discover instead 
 
 # External Integrations
 
-Track important third-party integrations.
-
-For each integration record:
-
-Purpose
-
-Current usage
-
-Known limitations
-
-This prevents duplicate integrations being introduced later.
+- Open Library: primary metadata source.
+- Google Books: secondary metadata source.
+- zxing-cpp: local barcode decoding.
+- Pillow: image handling for barcode decoding.
 
 ---
 
