@@ -45,7 +45,7 @@ MVP Development
 
 Current Focus
 
-Phased roadmap to daily-use readiness is in progress (plan in `docs/superpowers/plans/`). Phase 1 (foundation and correctness) is complete; next are bulk import, catalog workflow, reading tracking, and tags/notes/filters/dashboard. OCR and Gemini Vision remain future work.
+Phased roadmap to daily-use readiness is in progress (plan in `docs/superpowers/plans/`). Phases 1–3 (foundation, bulk import, catalog workflow) are complete; next are reading tracking and tags/notes/filters/dashboard. OCR and Gemini Vision remain future work.
 
 ---
 
@@ -96,6 +96,16 @@ Decision: A row with no usable ISBN is deduped by case-insensitive title + autho
 Reason: Re-importing a file with malformed ISBNs must not keep creating rows.
 Alternative considered: ISBN-only dedupe, which duplicates every no-ISBN row on re-import.
 
+Decision: Taxonomy endpoints are idempotent create-or-get, and the editor defers
+creating new names until the form is saved.
+Reason: Typing a name and cancelling must not leave stray authors or tags.
+Alternative considered: Creating entities as the user types.
+
+Decision: Book detail responses embed resolved taxonomy names; list items stay lean.
+Reason: Details and edit need names to render and prefill, while the list only
+needs ids and must stay cheap for thousands of books.
+Alternative considered: Client-side id-to-name resolution with extra requests.
+
 ---
 
 # Established Patterns
@@ -128,6 +138,9 @@ Frontend
 - The primary application shell lives in `frontend/src/layouts/AppLayout.tsx`.
 - API calls are centralized in `frontend/src/services/api.ts`.
 - Data fetching uses small hooks such as `useBooks`.
+- Add/edit forms share `BookForm`; taxonomy fields use `TaxonomyPicker` rather
+  than free-text names.
+- API errors use `ApiError` so callers can branch on `status` and `bookId`.
 
 ---
 
@@ -141,6 +154,8 @@ Frontend
 
 - `AppLayout` provides the persistent app navigation.
 - `PageHeader` provides the basic page title header.
+- `BookForm` renders every book field for both create and edit.
+- `TaxonomyPicker` provides chips, debounced search, and create-on-enter.
 
 Common hooks
 
@@ -165,6 +180,7 @@ Utilities
 - `app.core.uploads.read_limited` enforces chunked upload limits.
 - `app.core.csv_import.parse_csv` parses Goodreads/Kakurega CSV headers into rows.
 - `ImportService` orchestrates CSV imports; `CatalogRepository` creates named entities case-insensitively.
+- `TaxonomyRepository` lists taxonomy entities and performs committed create-or-get.
 - `BookFilters` carries list-query filters into `BookRepository`.
 
 Infrastructure

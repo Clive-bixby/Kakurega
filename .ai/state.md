@@ -67,6 +67,8 @@ Frontend
   Search, Import, Insights, and Settings
 - API client in `frontend/src/services/api.ts`
 - Data fetching hook in `frontend/src/hooks/useBooks.ts`
+- Reusable `BookForm` (add/edit) and `TaxonomyPicker` (chips + debounced
+  server search + create)
 
 Backend
 
@@ -76,7 +78,7 @@ Backend
 - Core settings, database session factory, and helpers under `backend/app/core`
   (`config`, `database`, `isbn`, `csv_import`, `uploads`, `errors`, `storage`)
 - SQLAlchemy models and associations under `backend/app/models`
-- Book and catalog repositories under `backend/app/repositories`
+- Book, catalog, and taxonomy repositories under `backend/app/repositories`
 - Book, metadata, barcode, and import services under `backend/app/services`
 - Alembic migrations under `backend/alembic/versions`
 
@@ -89,6 +91,8 @@ Frontend
 - App layout with persistent navigation
 - Shared page header
 - `useBooks` hook
+- `BookForm` — all book fields, taxonomy pickers, cover upload, duplicate link
+- `TaxonomyPicker` — removable chips, debounced search, create-on-enter
 
 Backend
 
@@ -102,6 +106,7 @@ Backend
 - `app.core.csv_import.parse_csv` — pure Goodreads/Kakurega CSV parsing
 - `ImportService` — per-row savepoints, duplicate handling, relationships
 - `CatalogRepository` — case-insensitive create-or-get for authors, publishers, genres, tags
+- `TaxonomyRepository` — taxonomy list/search and committed create-or-get
 - Metadata lookup service
 - Barcode decoding service
 
@@ -126,11 +131,17 @@ Frontend
 - `GET /api/v1/health`
 - `GET /api/v1/books` — paginated, filterable list; also the search endpoint
   (`q`, `genre_id`, `year_from`, `year_to`, `sort`, `limit`, `offset`). Returns
-  `{items, total, limit, offset}`; items omit `description` and `notes`.
-- `GET /api/v1/books/{id}`
+  `{items, total, limit, offset}`; items omit `description`, `notes`, and
+  resolved taxonomy names.
+- `GET /api/v1/books/{id}` — full book plus resolved `authors`, `genres`,
+  `tags`, and `publisher`
+- `GET /api/v1/books/isbn/{isbn}` — existing book by either ISBN form, 404 when
+  absent; used to intercept duplicates before creating
 - `POST /api/v1/books` — 409 with `detail.book_id` on duplicate ISBN
 - `PUT /api/v1/books/{id}` — `title: null`/blank → 422
 - `DELETE /api/v1/books/{id}`
+- `GET/POST /api/v1/authors`, `/publishers`, `/genres`, `/tags` — taxonomy list
+  (`q`, `limit`) and case-insensitive create-or-get
 - `POST /api/v1/import/csv` — Goodreads/Kakurega CSV, 10 MB cap, per-row results
 - `GET /api/v1/insights`
 - `POST /api/v1/upload/image` — 413 past 5 MB
@@ -204,7 +215,7 @@ docs/
 
 Backend follows the planned FastAPI architecture and implements models, repositories, services, schemas, migrations, and tests.
 
-Frontend implements routing, layout, API client, and wired pages for Dashboard, Library, Add Book, Book Details, and Search.
+Frontend implements routing, layout, API client, and wired pages for Dashboard, Library, Add Book, Book Details, Import, and Insights. Add Book performs ISBN/barcode lookup and duplicate interception; Book Details displays and edits every catalog field.
 
 ---
 
@@ -218,7 +229,7 @@ Phased plan: `docs/superpowers/plans/2026-10-24-phase-1-closeout.md`.
 |---|---|---|
 | 1 | Foundation and correctness | **Complete** |
 | 2 | Bulk import | **Complete** |
-| 3 | Catalog workflow | Not started |
+| 3 | Catalog workflow | **Complete** |
 | 4 | Reading tracking | Not started |
 | 5 | Tags, notes, filters, dashboard | Not started |
 
@@ -236,7 +247,8 @@ Phased plan: `docs/superpowers/plans/2026-10-24-phase-1-closeout.md`.
 - [x] Search (as `GET /books?q=`)
 - [x] Paginated / filtered / sorted book list
 - [x] ISBN identity and payload validation
-- [x] Tag schema (tables only; no tag API yet)
+- [x] Tag schema and CRUD-through-books (`tag_ids`); taxonomy list/create API
+- [x] Book lookup by ISBN for duplicate interception
 - [x] Chunked upload cap (5 MB)
 - [x] Upload
 - [x] Barcode (ISBN-only)
@@ -250,9 +262,10 @@ Phased plan: `docs/superpowers/plans/2026-10-24-phase-1-closeout.md`.
 
 - [x] Dashboard
 - [x] Library (paginated)
-- [x] Book Details
+- [x] Book Details (full display and edit)
 - [x] Search
-- [x] Add Book
+- [x] Add Book (ISBN lookup, barcode capture, manual entry, duplicate link)
+- [x] Catalog workflow (taxonomy pickers, ISBN by-line identity)
 - [x] Import (CSV results panel)
 - [ ] Insights
 - [ ] Settings
