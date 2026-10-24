@@ -45,7 +45,7 @@ MVP Development
 
 Current Focus
 
-Backend and frontend MVP flows are implemented. Identification pipeline has upload, barcode detection, and metadata lookup; OCR and Gemini Vision remain.
+Phased roadmap to daily-use readiness is in progress (plan in `docs/superpowers/plans/`). Phase 1 (foundation and correctness) is complete; next are bulk import, catalog workflow, reading tracking, and tags/notes/filters/dashboard. OCR and Gemini Vision remain future work.
 
 ---
 
@@ -60,6 +60,29 @@ Reason:
 Alternative considered:
 
 Only add decisions that are unlikely to change frequently.
+
+Decision: ISBN-13 is canonical book identity; ISBN-10 is stored alongside it.
+Reason: The same book must never be created twice because someone typed the other ISBN form.
+Alternative considered: Storing only the form the user entered.
+
+Decision: List endpoints return a page envelope `{items, total, limit, offset}`.
+Reason: The household library is expected to reach thousands of books; the client must not fetch them all.
+Alternative considered: A flat array with client-side pagination.
+
+Decision: `GET /books` is the only book list/search endpoint; `/search` was removed.
+Reason: Search is a filter over the same collection, not a separate resource.
+Alternative considered: Keeping `/search` beside a paginated `/books` (two code paths).
+
+Decision: Domain errors live in `app/core/errors.py` and routes translate them to HTTP.
+Reason: Keeps repositories free of FastAPI imports while preserving 409/400 semantics.
+
+Decision: Uploads are read in 64 KB chunks and rejected with 413 past 5 MB.
+Reason: Never buffer an unbounded request body in memory.
+Alternative considered: Trusting `Content-Length` alone.
+
+Decision: Alembic migrations touching SQLite constraints use `batch_alter_table`.
+Reason: SQLite cannot ALTER constraints; batch mode is required for the test/migration cycle.
+Alternative considered: PostgreSQL-only migrations, which break local verification.
 
 ---
 
@@ -81,9 +104,11 @@ Backend
 
 - FastAPI app creation lives in `backend/app/main.py` via `create_app()`.
 - Versioned routes are collected under `backend/app/api/v1` and mounted at the configured API prefix.
-- Route dependencies use `request.app.state.session_factory` for database sessions.
+- Route dependencies use `get_db` from `backend/app/api/deps.py`, which reads `request.app.state.session_factory`.
 - Business logic lives in services; database access lives in repositories.
+- Repositories raise domain errors; routes map them to status codes.
 - Pydantic schemas live under `backend/app/schemas`.
+- Pure helpers (ISBN, upload limits) live under `backend/app/core`.
 
 Frontend
 
@@ -124,6 +149,9 @@ Repositories
 Utilities
 
 - `create_app()` builds the FastAPI application and lifespan.
+- `app.core.isbn` canonicalises and validates ISBNs; use it instead of hand-parsing.
+- `app.core.uploads.read_limited` enforces chunked upload limits.
+- `BookFilters` carries list-query filters into `BookRepository`.
 
 Infrastructure
 
