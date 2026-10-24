@@ -69,8 +69,12 @@ Frontend
 - Data fetching hook in `frontend/src/hooks/useBooks.ts`
 - Reusable `BookForm` (add/edit) and `TaxonomyPicker` (chips + debounced
   server search + create)
-- Shared `StatusBadge`, `ProgressBar`, `EmptyState`, and `BarList`;
+- Shared `StatusBadge`, `ProgressBar`, `EmptyState`, `BarList`, and `BookCover`;
   `ReadingPanel` on Book Details
+- Literary Noir theme in `frontend/src/styles.css`: 260px sidebar, sticky topbar
+  search (`Ctrl/Cmd+K`), layered surface cards, pill chips, thin progress bars,
+  cover grid; content column capped at 1240px. Tokens follow
+  `design/stitch/theme/DESIGN.md`.
 
 Backend
 
@@ -92,12 +96,13 @@ Backend
 
 Frontend
 
-- App layout with persistent navigation
-- Shared page header
+- App layout with persistent sidebar, topbar search, and mobile header
+- Shared page header (`eyebrow`, `title`, `description`, actions)
 - `useBooks` hook
 - `BookForm` — all book fields, taxonomy pickers, cover upload, duplicate link
 - `TaxonomyPicker` — removable chips, debounced search, create-on-enter
 - `StatusBadge` / `ProgressBar` — reading status and derived page progress
+- `BookCover` — cover image with a generated typographic fallback
 - `EmptyState` — consistent empty/error-free placeholders
 - `BarList` — accessible horizontal breakdown bars for insights
 - `ReadingPanel` — per-book reading entries and upsert form
@@ -143,7 +148,8 @@ Frontend
 - `GET /api/v1/books` — paginated, filterable list; also the search endpoint
   (`q`, `genre_id`, `tag`, `year_from`, `year_to`, `member_id`, `status`,
   `sort`, `limit`, `offset`). Returns `{items, total, limit, offset}`; items
-  omit `description`, `notes`, and resolved taxonomy names.
+  omit `description`, `notes`, and resolved taxonomy objects, but include
+  `author_names` for card bylines.
 - `GET /api/v1/books/{id}` — full book plus resolved `authors`, `genres`,
   `tags`, and `publisher`
 - `GET /api/v1/books/isbn/{isbn}` — existing book by either ISBN form, 404 when
@@ -164,7 +170,8 @@ Frontend
 - `GET /api/v1/reading?member_id&status` — household entries, newest first
 - `POST /api/v1/import/csv` — Goodreads/Kakurega CSV, 10 MB cap, per-row results
 - `GET /api/v1/insights` — totals, by year/genre/author/language,
-  `currently_reading`, and five most recently added books
+  `currently_reading`, and five most recently added books; currently-reading and
+  recently-added items carry `cover_url` and `author_name`
 - `POST /api/v1/upload/image` — 413 past 5 MB
 - `POST /api/v1/lookup`
 - `POST /api/v1/barcode` — only valid ISBN-10 / 978-979 ISBN-13 accepted
@@ -245,7 +252,7 @@ docs/
 
 Backend follows the planned FastAPI architecture and implements models, repositories, services, schemas, migrations, and tests.
 
-Frontend implements routing, layout, API client, and wired pages for Dashboard, Library, Tags, Add Book, Book Details, Reading, Import, Insights, Search, and Settings. Add Book performs ISBN/barcode lookup and duplicate interception; Book Details displays and edits every catalog field and hosts per-member reading tracking; Library composes search, genre, tag, year, member, status, and sort filters; Tags supports rename/delete with book counts; Dashboard and Insights render currently-reading, recently-added, and collection breakdowns.
+Frontend implements routing, a Literary Noir app shell (sidebar, topbar search, mobile header), API client, and wired pages for Dashboard, Library, Tags, Add Book, Book Details, Reading, Import, Insights, Search, and Settings. Add Book performs ISBN/barcode lookup and duplicate interception; Book Details displays and edits every catalog field and hosts per-member reading tracking; Library composes search, genre, tag, year, member, status, and sort filters; Tags supports rename/delete with book counts; Dashboard and Insights render currently-reading, recently-added, and collection breakdowns.
 
 ---
 
@@ -302,7 +309,7 @@ Phased plan: `docs/superpowers/plans/2026-10-24-phase-1-closeout.md`.
 - [x] Catalog workflow (taxonomy pickers, ISBN by-line identity)
 - [x] Import (CSV results panel)
 - [x] Insights (year, genre, author, language breakdowns)
-- [ ] Settings
+- [x] Settings (theme summary, shortcuts to tags/reading/import, data notes)
 
 ## Identification Pipeline
 
@@ -318,3 +325,5 @@ Phased plan: `docs/superpowers/plans/2026-10-24-phase-1-closeout.md`.
 Backend tests use a temporary SQLite database and `Base.metadata.create_all`.
 
 Frontend build uses TypeScript and Vite.
+
+Visual source of truth: `design/stitch/theme/DESIGN.md` plus the screen PNGs in `design/stitch/`. Class names and tokens live in the single stylesheet `frontend/src/styles.css`; pages compose those classes rather than inline styles.

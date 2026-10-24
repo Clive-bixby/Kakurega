@@ -5,6 +5,25 @@
 **Version:** 1.0\
 **Status:** Draft
 
+> **Implemented theme (current).** The frontend ships the "Literary Noir" theme
+> from `design/stitch/theme/DESIGN.md`; treat those mockups and tokens as
+> authoritative where this draft is generic.
+>
+> - Surfaces: background `#111317`, surface `#16191F`, raised `#1E2024`,
+>   border `#2D333D`
+> - Text: primary `#F8FAFC`, muted `#94A3B8`, accent text `#C0C1FF`, accent fill
+>   `#6A67F5`
+> - Type: Inter for headings and body; tabular numbers for stats and progress
+> - Shape: 12–16px radii, hairline borders, minimal shadow; content column
+>   capped at 1240px with 40px page padding
+> - Shell: 260px sidebar (Dashboard, Library, Tags, Reading, Import, Insights +
+>   "Add New Book"), sticky topbar search routed to `/library?q=`, and a stacked
+>   header below 900px
+> - Dark theme only. Books without artwork get a generated typographic cover,
+>   never an empty frame.
+>
+> All tokens and component classes live in `frontend/src/styles.css`.
+
 ------------------------------------------------------------------------
 
 # 1. Design Philosophy

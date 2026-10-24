@@ -148,6 +148,35 @@ Reason: SQLite runs without foreign-key pragmas in tests, so `ON DELETE CASCADE`
 alone would leave orphaned associations.
 Alternative considered: Relying only on the database cascade.
 
+Decision: The interface follows the Literary Noir theme captured in
+`design/stitch` (charcoal surfaces, lavender accent, Inter, 260px sidebar,
+topbar search, cover-forward grids).
+Reason: The visual reference is the product brief, so screens must be judged
+against those PNGs rather than an invented palette.
+Alternative considered: Keeping the earlier plain utility styling and treating
+the mockups as loose inspiration.
+
+Decision: Every design token and component class lives in the single global
+`frontend/src/styles.css`; pages compose classes instead of inline styles.
+Reason: One token layer keeps screens consistent and makes the theme auditable.
+Alternative considered: CSS modules or per-component style files.
+
+Decision: List responses include `author_names` (and insights include
+`cover_url`/`author_name`) instead of full taxonomy objects.
+Reason: Cover grids need bylines and covers without N+1 detail requests, while
+list payloads must stay cheap.
+Alternative considered: Fetching `GET /books/{id}` per card.
+
+Decision: Books without cover art render a generated typographic
+`BookCover` (gradient, title, Kakurega mark) rather than a blank frame.
+Reason: A cover-forward grid collapses visually when most of a personal library
+has no artwork.
+Alternative considered: A generic placeholder image.
+
+Decision: Below 900px the shell becomes a horizontal header and the grids stack.
+Reason: The sidebar consumes the viewport on tablets and phones, and the topbar
+search must stay reachable.
+
 Decision: `GET /insights` uses grouped aggregate SQL with fixed limits (top 10
 genres/authors, 5 newest books) rather than loading every book into Python.
 Reason: Dashboard numbers must stay cheap as the library grows and the two pages
@@ -190,6 +219,9 @@ Frontend
 - Add/edit forms share `BookForm`; taxonomy fields use `TaxonomyPicker` rather
   than free-text names.
 - API errors use `ApiError` so callers can branch on `status` and `bookId`.
+- Styling is one global stylesheet using CSS variables; new screens reuse the
+  existing `.panel`, `.book-grid`, `.chip`, `.btn-primary`, and `PageHeader`
+  patterns instead of adding new one-off styles.
 
 ---
 
@@ -201,8 +233,10 @@ Examples:
 
 Frontend
 
-- `AppLayout` provides the persistent app navigation.
-- `PageHeader` provides the basic page title header.
+- `AppLayout` provides the persistent sidebar, topbar search (`Ctrl/Cmd+K`), and
+  mobile header.
+- `PageHeader` provides the page eyebrow, title, description, and action slot.
+- `BookCover` renders a cover image or a deterministic typographic fallback.
 - `BookForm` renders every book field for both create and edit.
 - `TaxonomyPicker` provides chips, debounced search, and create-on-enter.
 - `StatusBadge` maps reading statuses to labels and badge classes.

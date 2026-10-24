@@ -30,23 +30,26 @@ and consistent with the design system.
 
 ## Purpose
 
-Primary application navigation.
+Primary application navigation. Implemented in `AppLayout` as a 260px column
+that collapses into a horizontal header below 900px.
 
 ## Items
 
 -   Dashboard
 -   Library
--   Add Book
+-   Tags
+-   Reading
+-   Import
 -   Insights
--   Search
--   Settings
+
+Plus an "Add New Book" primary action and a Settings link in the sidebar footer.
 
 ## States
 
 -   Default
 -   Hover
 -   Active
--   Collapsed (future)
+-   Collapsed (mobile header)
 
 ------------------------------------------------------------------------
 
@@ -54,10 +57,11 @@ Primary application navigation.
 
 Contains:
 
--   Search
+-   Global search (routes to `/library?q=`, `Ctrl/Cmd+K` focuses it)
+-   "Add book" shortcut
+-   Avatar placeholder
 -   Notifications (future)
--   Theme Toggle
--   User Menu (future)
+-   Theme Toggle (future)
 
 ------------------------------------------------------------------------
 
